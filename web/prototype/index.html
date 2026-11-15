@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Looperman API — WAV + ZIP</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0a0f;--card:#14141d;--card2:#1c1c28;--border:#262636;--accent:#ff3b30;--accent2:#ff6a00;--muted:#9aa0b3;--text:#f2f2f7;--green:#1ed760;--yellow:#ffcc00;--blue:#3b82f6}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui;overflow-x:hidden}a{color:inherit}
+  .header{position:sticky;top:0;z-index:20;background:rgba(10,10,15,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+  .header-inner{max-width:1280px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .logo{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:-0.02em}
+  .logo-mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;font-size:18px}
+  .logo span{font-size:18px}.logo small{font-weight:600;color:var(--muted);font-size:12px;margin-left:6px;background:var(--card2);padding:2px 8px;border-radius:999px;border:1px solid var(--border)}
+  .header-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{border:1px solid var(--border);background:var(--card2);color:var(--text);padding:9px 14px;border-radius:10px;font-weight:600;font-size:13px;cursor:pointer;transition:.15s}
+  .btn:hover{border-color:#333;background:#222232}.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:white;box-shadow:0 6px 18px rgba(255,59,48,.25)}
+  .btn-primary:hover{filter:brightness(1.06);transform:translateY(-1px)}.btn-sm{padding:7px 10px;font-size:12px}.btn-ghost{background:transparent}
+  .pill{font-family:JetBrains Mono,monospace;font-size:11px;background:#1b1b26;border:1px solid var(--border);padding:4px 8px;border-radius:999px;color:var(--muted)}
+  .pill.ok{color:var(--green);border-color:rgba(30,215,96,.35);background:rgba(30,215,96,.08)}.pill.warn{color:var(--yellow);border-color:rgba(255,204,0,.4)}
+  .wrap{max-width:1280px;margin:0 auto;padding:18px 20px 60px}
+  .hero{margin:14px 0 16px;background:linear-gradient(180deg,#14141d 0%,#0e0e14 100%);border:1px solid var(--border);border-radius:18px;padding:18px;display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+  @media(max-width:900px){.hero{grid-template-columns:1fr}}
+  .hero h1{margin:0;font-size:21px;line-height:1.15;letter-spacing:-0.02em}
+  .hero h1 b{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .hero p{color:var(--muted);font-size:13.5px;line-height:1.5;margin:8px 0 0}
+  .hero-card{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:14px}
+  .hero-card h3{margin:0 0 8px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .hero-stats{display:flex;gap:8px;flex-wrap:wrap}.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;min-width:110px;flex:1}
+  .kpi strong{font-size:18px}.kpi span{font-size:11px;color:var(--muted);display:block;margin-top:2px;font-family:JetBrains Mono}
+  .filters{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px}
+  .filters-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .filters-head h2{margin:0;font-size:14px;letter-spacing:.02em}
+  .filters-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+  @media(max-width:1100px){.filters-grid{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:600px){.filters-grid{grid-template-columns:1fr 1fr}}
+  .field label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px;display:block}
+  .field select,.field input{width:100%;background:#0f0f16;border:1px solid var(--border);color:var(--text);padding:10px 11px;border-radius:10px;font-size:13px;outline:none;transition:.15s}
+  .field select:focus,.field input:focus{border-color:#3a3a55;background:#13131d}
+  .filters-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+  .range{display:flex;gap:8px;align-items:center}.range input{width:90px}
+  .chip{font-size:11px;padding:6px 9px;border-radius:999px;background:var(--card2);border:1px solid var(--border);color:var(--muted)}
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 2px;flex-wrap:wrap}
+  .count{font-family:JetBrains Mono;font-size:12px;color:var(--muted)}
+  .selection-bar{display:none;align-items:center;gap:10px;background:linear-gradient(135deg,#1a1a2e,#14141d);border:1px solid #2a2a45;padding:8px 10px;border-radius:12px}
+  .selection-bar.show{display:flex;flex-wrap:wrap}.dots{display:flex;gap:6px}.dot{width:8px;height:8px;border-radius:50%;background:var(--border)}.dot.filled{background:var(--green)}
+  .status{margin:10px 2px;color:var(--muted);font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;display:none}
+  .spinner.show{display:block}@keyframes spin{to{transform:rotate(360deg)}}
+  .results{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
+  @media(max-width:900px){.results{grid-template-columns:1fr}}
+  .card-loop{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:.15s}
+  .card-loop:hover{border-color:#2e2e45;transform:translateY(-1px)}.card-loop.selected{border-color:var(--green);box-shadow:0 0 0 1px rgba(30,215,96,.2)}
+  .wave{height:88px;background:var(--card2);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .wave img{width:100%;height:100%;object-fit:cover;opacity:.95}.play{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:white;color:black;display:grid;place-items:center;border:none;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,.35);font-size:14px}
+  .play.playing{background:var(--green)}.duration{position:absolute;right:10px;bottom:8px;background:rgba(0,0,0,.7);border:1px solid rgba(255,255,255,.15);padding:3px 7px;border-radius:999px;font-family:JetBrains Mono;font-size:11px}
+  .check{position:absolute;right:10px;top:10px;width:26px;height:26px;border-radius:8px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center;cursor:pointer;color:white;font-size:13px;backdrop-filter:blur(6px)}
+  .check.checked{background:var(--green);border-color:var(--green);color:black}
+  .card-body{padding:12px}.card-title{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.01em}
+  .card-meta{color:var(--muted);font-size:12px;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .tags{margin-top:9px;display:flex;flex-wrap:wrap;gap:6px}
+  .tag{font-size:11px;padding:5px 8px;border-radius:999px;background:#0f0f16;border:1px solid var(--border);font-weight:600}
+  .tag.bpm{background:white;color:black;border-color:white}.tag.key{background:#23233a;color:#c8c8ff;border-color:#2e2e4a}
+  .card-foot{margin-top:10px;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .mini{font-size:11px;color:var(--muted);font-family:JetBrains Mono}
+  .download{background:var(--card2);border:1px solid var(--border);padding:8px 10px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
+  .download:hover{border-color:white;background:white;color:black}
+  .download:disabled{opacity:.4;cursor:not-allowed}.download-wav{border-color:#2a2a45;color:#c8c8ff}
+  .download-wav.enabled{border-color:var(--green);color:var(--green)}.download-wav.enabled:hover{background:var(--green);color:black}
+  .empty{grid-column:1/-1;background:var(--card);border:1px dashed var(--border);border-radius:14px;padding:24px;text-align:center;color:var(--muted)}
+  .empty big{color:white;font-weight:800;display:block;margin-bottom:6px}
+  .footer{margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;color:var(--muted);font-size:12px;line-height:1.6}
+  .footer b{color:white}code{background:#0f0f16;border:1px solid var(--border);padding:2px 6px;border-radius:6px;font-family:JetBrains Mono;font-size:11px;color:#d7d7ff}
+  /* Modal */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);display:none;place-items:center;z-index:50;padding:16px}
+  .modal-backdrop.show{display:grid}
+  .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;max-width:420px;width:100%;padding:18px;box-shadow:0 24px 60px rgba(0,0,0,.6)}
+  .modal h3{margin:0 0 8px;font-size:16px}.modal p{margin:0 0 10px;color:var(--muted);font-size:13px;line-height:1.5}
+  .modal input{width:100%;background:#0f0f16;border:1px solid var(--border);color:var(--text);padding:11px 12px;border-radius:10px;font-size:13px;margin-bottom:8px}
+  .modal input:focus{border-color:var(--accent);outline:none}
+  .modal-actions{display:flex;gap:8px;margin-top:10px}
+  .notice{margin-top:10px;background:#1a1a2e;border:1px solid #2a2a45;border-radius:10px;padding:8px 10px;font-size:11px;color:var(--muted);line-height:1.4}
+  .zip-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .zip-btn{background:linear-gradient(135deg,#1a1a2e,#23233a);border:1px solid #2e2e4a;padding:9px 12px;border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .zip-btn:hover{border-color:white;color:white}.zip-btn.wav{background:linear-gradient(135deg,#0f2a19,#1a3a24);border-color:rgba(30,215,96,.35)}
+  .zip-btn.wav:disabled{opacity:.4}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark">◉</div>
+      <span>LOOPMANAGER <small>v2 • WAV + ZIP</small></span>
+      <span class="pill" id="healthPill">● vérif…</span>
+      <span class="pill" id="authPill">🔒 non connecté</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-sm" id="btnLogin">🔑 Se connecter</button>
+      <button class="btn btn-sm" id="btnLogout" style="display:none">Déconnexion</button>
+      <button class="btn btn-sm btn-ghost" onclick="window.open('/api/docs','_blank')">Docs API →</button>
+      <button class="btn btn-primary btn-sm" onclick="document.getElementById('filters').scrollIntoView({behavior:'smooth'})">Filtrer ↓</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div>
+      <h1>Cherche & télécharge <b>2-4 loops</b> • WAV direct + ZIP</h1>
+      <p>Connecte ton <b>compte Looperman</b> → récupère les <b>WAV haute qualité</b> directement. Sans login tu as déjà les MP3 previews. Sélectionne 2-4 loops et exporte en <b>ZIP en 1 clic</b>.</p>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <span class="pill" id="pillMp3">MP3 preview : sans login ✅</span>
+        <span class="pill" id="pillWav">WAV : 🔒 login requis</span>
+        <span class="pill">ZIP : 2-4 loops</span>
+      </div>
+      <div class="zip-actions" style="margin-top:12px">
+        <button class="zip-btn" id="zipMp3Btn" onclick="downloadZip('mp3')">⬇ ZIP MP3 (<span id="zipCountMp3">0</span>)</button>
+        <button class="zip-btn wav" id="zipWavBtn" onclick="downloadZip('wav')">💎 ZIP WAV (<span id="zipCountWav">0</span>) <span style="font-size:10px;opacity:.7">login requis</span></button>
+      </div>
+    </div>
+    <div class="hero-card">
+      <h3>Ta sélection (2-4 loops)</h3>
+      <div class="hero-stats">
+        <div class="kpi"><strong id="kpiSelected">0</strong><span>sélectionnés</span></div>
+        <div class="kpi"><strong id="kpiBpm">—</strong><span>BPM moyen</span></div>
+        <div class="kpi"><strong id="kpiKey">—</strong><span>Key dominante</span></div>
+      </div>
+      <div class="dots" style="margin-top:10px"><div class="dot" id="dot1"></div><div class="dot" id="dot2"></div><div class="dot" id="dot3"></div><div class="dot" id="dot4"></div></div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" style="flex:1" id="btnDownloadSelection">⬇ Télécharger MP3 un par un</button>
+        <button class="btn" id="btnClear">Effacer</button>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button class="btn" style="flex:1;font-size:12px" onclick="downloadZip('mp3')">📦 ZIP MP3</button>
+        <button class="btn" style="flex:1;font-size:12px;border-color:var(--green);color:var(--green)" onclick="downloadZip('wav')">💎 ZIP WAV</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters" id="filters">
+    <div class="filters-head">
+      <h2>⚙ Filtres Looperman</h2>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="count" id="urlPreview"></span>
+        <button class="btn btn-sm" onclick="resetFilters()">Réinitialiser</button>
+      </div>
+    </div>
+    <div class="filters-grid">
+      <div class="field"><label>Genre</label><select id="fGenre"></select></div>
+      <div class="field"><label>Catégorie</label><select id="fCategory"></select></div>
+      <div class="field"><label>Key</label><select id="fKey"></select></div>
+      <div class="field"><label>BPM</label><div class="range"><input id="fBpm" type="number" placeholder="ex: 140" min="40" max="220"><span class="chip">BPM</span></div></div>
+      <div class="field"><label>Quantité</label><select id="fLimit"><option value="2">2 loops</option><option value="3">3 loops</option><option value="4" selected>4 loops</option><option value="8">8 loops</option></select></div>
+      <div class="field"><label>Trier par</label><select id="fOrder"><option value="date">Plus récent</option><option value="downloads">Plus téléchargé</option></select></div>
+    </div>
+    <div class="field" style="margin-top:10px"><label>Mot-clé (optionnel)</label><input id="fKeyword" placeholder="ex: dark plugg, emotional piano…"></div>
+    <div class="filters-actions">
+      <button class="btn btn-primary" id="btnSearch" style="padding:11px 18px">🔍 Rechercher</button>
+      <button class="btn" id="btnRandom">🎲 Aléatoire</button>
+      <span class="chip" id="chipGenre">Genre: Trap</span><span class="chip" id="chipCount">4 loops</span><span class="chip" id="chipKey">Key: Am</span>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted);font-family:JetBrains Mono">Endpoint : <code id="endpoint">/api/search?genre=Trap&bpm=140&key=Am&limit=4</code></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="toolbar-left"><div class="count" id="countInfo">Prêt</div><span class="pill" id="loopermanUrl" style="max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span></div>
+    <div class="selection-bar" id="selectionBar"><span class="mini" id="selectionText">0 sélectionné(s)</span><button class="btn btn-primary btn-sm" onclick="downloadSelection()">⬇ MP3 1 par 1</button><button class="btn btn-sm" style="border-color:var(--green);color:var(--green)" onclick="downloadZip('wav')">💎 ZIP WAV</button><button class="btn btn-sm" onclick="downloadZip('mp3')">📦 ZIP MP3</button></div>
+  </div>
+
+  <div class="status"><div class="spinner" id="spinner"></div><span id="statusText">Astuce : Traite la ZIP WAV comme un pack — elle arrive nommée <code>140bpm_Am_Trap_Piano.zip</code> avec README inclus.</span></div>
+  <div class="results" id="results"></div>
+
+  <div class="footer">
+    <b>Login WAV :</b> clique <b>🔑 Se connecter</b> en haut → entre ton email/mdp Looperman → la session est gardée côté serveur (mémoire). Ensuite tous les boutons <b>💎 WAV</b> et <b>ZIP WAV</b> passent en vert.<br>
+    <b>ZIP :</b> <code>POST /api/download/zip</code> avec <code>{"ids":["435165","435157"],"format":"wav"}</code> → ZIP instantané. Rate-limit respecté (1s entre chaque WAV).<br>
+    Respect ToS : usage perso, pas de dump massif.
+  </div>
+</div>
+
+<!-- Modal login -->
+<div class="modal-backdrop" id="loginModal">
+  <div class="modal">
+    <h3>🔑 Connexion Looperman</h3>
+    <p>Entre tes identifiants Looperman pour débloquer les <b>WAV</b> et le <b>ZIP WAV</b>. Rien n'est logué — session gardée en mémoire serveur juste pour toi.</p>
+    <input id="loginEmail" type="email" placeholder="email@exemple.com" autocomplete="email">
+    <input id="loginPass" type="password" placeholder="mot de passe" autocomplete="current-password">
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="btnLoginSubmit" style="flex:1">Se connecter</button>
+      <button class="btn" onclick="closeLogin()">Annuler</button>
+    </div>
+    <div class="notice">
+      🔒 Tes identifiants servent uniquement à faire un <code>POST https://www.looperman.com/account/login</code> avec <code>csrftoken</code>. Pas de stockage disque. Tu peux déconnecter à tout moment. Si Looperman affiche “limite atteinte”, attends 24h.
+    </div>
+    <div id="loginError" style="margin-top:8px;color:var(--accent);font-size:12px;display:none"></div>
+  </div>
+</div>
+
+<audio id="player" preload="none"></audio>
+
+<script>
+const $=s=>document.querySelector(s);
+const genresFull=["","Trap","Hip Hop","House","Techno","Dubstep","Drum And Bass","EDM","Electronic","Ambient","Lo-Fi","Phonk","Afrobeat","Boom Bap","RnB","Pop","Rock","Cinematic","Classical","Jazz","Funk","Deep House","Reggaeton","Dancehall","Trance","Chill Out","Acoustic","Blues","Country"];
+const categories=["","Piano","Synth","Drum","Bass","Bass Synth","Bass Guitar","Bells","Guitar Acoustic","Guitar Electric","Strings","Pad","Vocal","Choir","Brass","Flute","Organ","Percussion","Fx","Harp","Violin","Wobble Bass","Arpeggio"];
+const keys=["","C","Cm","C#","C#m","D","Dm","D#","D#m","E","Em","F","Fm","F#","F#m","G","Gm","G#","G#m","A","Am","A#","A#m","B","Bm"];
+let selected=new Map();let currentLoops=[];let audio=document.getElementById('player');let playingId=null;let authState={logged_in:false};
+
+function initSelects(){
+  const g=$('#fGenre');g.innerHTML=genresFull.map(v=>`<option value="${v}">${v||'— Tous genres —'}</option>`).join('');g.value="Trap";
+  const c=$('#fCategory');c.innerHTML=categories.map(v=>`<option value="${v}">${v||'— Toutes catégories —'}</option>`).join('');
+  const k=$('#fKey');k.innerHTML=keys.map(v=>`<option value="${v}">${v||'— Toutes keys —'}</option>`).join('');k.value="Am";
+  updateChips();[g,c,k,$('#fBpm'),$('#fLimit'),$('#fOrder'),$('#fKeyword')].forEach(el=>{el.addEventListener('input',updateChips);el.addEventListener('change',updateChips);});
+}
+function updateChips(){
+  const genre=$('#fGenre').value||"Tous",cat=$('#fCategory').value||"Toutes",key=$('#fKey').value||"Toutes",bpm=$('#fBpm').value||"—",limit=$('#fLimit').value;
+  $('#chipGenre').textContent=`Genre: ${genre}`;$('#chipKey').textContent=`Key: ${key} • ${cat}`;$('#chipCount').textContent=`${limit} loops • ${bpm} BPM`;
+  const p=new URLSearchParams();if(genre)p.set('genre',genre);if(cat)p.set('category',cat);if(key)p.set('key',key);if(bpm&&bpm!=="—")p.set('bpm',bpm);p.set('limit',limit);p.set('order',$('#fOrder').value);const kw=$('#fKeyword').value.trim();if(kw)p.set('keyword',kw);
+  $('#endpoint').textContent=`/api/search?${p.toString()}`;
+}
+function resetFilters(){$('#fGenre').value="Trap";$('#fCategory').value="";$('#fKey').value="Am";$('#fBpm').value="140";$('#fKeyword').value="";$('#fOrder').value="date";updateChips();}
+async function refreshAuth(){
+  try{
+    const r=await fetch('/api/auth/status');const j=await r.json();
+    authState=j;
+    if(j.logged_in){
+      $('#authPill').textContent=`✅ ${j.username||j.email}`;$('#authPill').className="pill ok";
+      $('#pillWav').textContent="WAV : ✅ connecté";$('#pillWav').className="pill ok";
+      $('#btnLogin').style.display="none";$('#btnLogout').style.display="inline-block";
+      $('#zipWavBtn').disabled=false;
+    }else{
+      $('#authPill').textContent="🔒 non connecté";$('#authPill').className="pill warn";
+      $('#pillWav').textContent="WAV : 🔒 login requis";$('#pillWav').className="pill";
+      $('#btnLogin').style.display="inline-block";$('#btnLogout').style.display="none";
+      $('#zipWavBtn').disabled=false;
+    }
+    updateSelectionUI();
+  }catch{}
+}
+function openLogin(){$('#loginModal').classList.add('show');$('#loginError').style.display="none";}
+function closeLogin(){$('#loginModal').classList.remove('show');}
+$('#btnLogin').onclick=openLogin;
+$('#loginModal').onclick=e=>{if(e.target.id==='loginModal')closeLogin();}
+$('#btnLogout').onclick=async()=>{
+  await fetch('/api/auth/logout',{method:'POST'});
+  await refreshAuth();setStatus("Déconnecté");
+};
+$('#btnLoginSubmit').onclick=async()=>{
+  const email=$('#loginEmail').value.trim(),password=$('#loginPass').value;
+  if(!email||!password){$('#loginError').textContent="Remplis email + mot de passe";$('#loginError').style.display="block";return;}
+  $('#btnLoginSubmit').textContent="Connexion…";$('#btnLoginSubmit').disabled=true;$('#loginError').style.display="none";
+  try{
+    const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.detail|| j.error || "Erreur login");
+    closeLogin();await refreshAuth();setStatus(`Connecté en tant que ${j.username||email} — WAV débloqués`);
+    // re-search to get wav links if any
+  }catch(e){$('#loginError').textContent=e.message;$('#loginError').style.display="block";}
+  $('#btnLoginSubmit').textContent="Se connecter";$('#btnLoginSubmit').disabled=false;
+};
+async function checkHealth(){
+  try{const r=await fetch('/api/health');const j=await r.json();$('#healthPill').textContent="● en ligne";$('#healthPill').className="pill ok";}catch{$('#healthPill').textContent="● hors ligne";$('#healthPill').className="pill warn";}
+}
+function setStatus(m,l=false){$('#statusText').textContent=m;$('#spinner').classList.toggle('show',l);}
+function updateSelectionUI(){
+  const n=selected.size;$('#kpiSelected').textContent=n;$('#selectionText').textContent=`${n} sélectionné(s)`;$('#selectionBar').classList.toggle('show',n>0);
+  for(let i=1;i<=4;i++)$('#dot'+i).classList.toggle('filled',i<=n);
+  if(n>0){const loops=Array.from(selected.values());const avg=Math.round(loops.reduce((a,b)=>a+(b.bpm||140),0)/loops.length);$('#kpiBpm').textContent=avg+" BPM";const counts={};loops.forEach(l=>{const k=l.key||"—";counts[k]=(counts[k]||0)+1;});const top=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0]?.[0]||"—";$('#kpiKey').textContent=top;}else{$('#kpiBpm').textContent="—";$('#kpiKey').textContent="—";}
+  $('#zipCountMp3').textContent=n;$('#zipCountWav').textContent=n;
+  document.querySelectorAll('.card-loop').forEach(card=>{const id=card.dataset.id;card.classList.toggle('selected',selected.has(id));const chk=card.querySelector('.check');if(chk)chk.classList.toggle('checked',selected.has(id));});
+  // Update wav buttons state
+  const wavLocked=!authState.logged_in;
+  document.querySelectorAll('.download-wav').forEach(b=>{if(wavLocked){b.title="Connecte-toi pour WAV";}else{b.title="Télécharger WAV";b.classList.add('enabled');}});
+}
+function toggleSelect(loop){if(selected.has(loop.id))selected.delete(loop.id);else{if(selected.size>=4){alert("Max 4 loops");return;}selected.set(loop.id,loop);}updateSelectionUI();}
+async function playLoop(id){
+  const loop=currentLoops.find(l=>l.id===id);if(!loop||!loop.mp3_url)return alert("Preview indisponible");
+  if(playingId===id&&!audio.paused){audio.pause();audio.currentTime=0;playingId=null;updatePlayButtons();return;}
+  audio.pause();audio.currentTime=0;playingId=id;updatePlayButtons();
+  audio.onended=()=>{playingId=null;updatePlayButtons();};
+  audio.onerror=()=>{playingId=null;updatePlayButtons();setStatus("Lecture impossible — vérifie que l’API locale est démarrée.");};
+  audio.onplay=updatePlayButtons;audio.onpause=updatePlayButtons;
+  // Stream through the same-origin API proxy; direct Looperman audio can reject hotlinked playback.
+  audio.src=`/api/stream/preview?url=${encodeURIComponent(loop.mp3_url)}`;audio.load();
+  try{await audio.play();}catch(e){playingId=null;updatePlayButtons();setStatus(`Lecture impossible : ${e.message}`);}
+}
+function updatePlayButtons(){document.querySelectorAll('.play').forEach(b=>{const id=b.dataset.id;const on=playingId===id&&!audio.paused;b.textContent=on?"❚❚":"▶";b.classList.toggle('playing',on);});}
+async function downloadOne(loop){
+  if(!loop.mp3_url)return;
+  const u=`/api/download/proxy?url=${encodeURIComponent(loop.mp3_url)}`;const a=document.createElement('a');a.href=u;a.download=`${loop.key||'Unknown'}_${loop.bpm||'--'}bpm_${loop.title.replace(/[^a-z0-9]/gi,'_').slice(0,30)}.mp3`;document.body.appendChild(a);a.click();a.remove();
+}
+async function downloadWavOne(loop){
+  if(!authState.logged_in){openLogin();return;}
+  // Direct via backend wav endpoint
+  const url=`/api/download/wav/${loop.id}`;
+  const a=document.createElement('a');a.href=url;a.download="";document.body.appendChild(a);a.click();a.remove();
+}
+function downloadSelection(){if(selected.size===0)return alert("Sélectionne 2-4 loops");if(selected.size<2&&!confirm(`Tu n'as que ${selected.size} loop. Continuer ?`))return;const loops=Array.from(selected.values());let d=0;loops.forEach(l=>setTimeout(()=>downloadOne(l),d+=600));setStatus(`Téléchargement de ${loops.length} MP3 lancé…`);}
+async function downloadZip(fmt){
+  if(selected.size===0)return alert("Sélectionne d'abord 2-4 loops avec ＋");
+  if(fmt==="wav"&&!authState.logged_in){openLogin();return;}
+  const payload={ids:Array.from(selected.keys()),loops:Array.from(selected.values()),format:fmt,filename:`looperman_${fmt}_${selected.size}loops.zip`};
+  setStatus(`Création ZIP ${fmt.toUpperCase()}…`,true);
+  try{
+    const r=await fetch('/api/download/zip',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(!r.ok){const j=await r.json().catch(()=>({detail:r.statusText}));throw new Error(j.detail||"Erreur ZIP");}
+    const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`looperman_${fmt}_${selected.size}loops.zip`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+    setStatus(`ZIP ${fmt.toUpperCase()} téléchargé — ${selected.size} loops`);
+  }catch(e){setStatus("Erreur ZIP: "+e.message);alert(e.message);}
+}
+function renderLoops(loops,url){
+  currentLoops=loops;$('#countInfo').textContent=`${loops.length} loops trouvés`;$('#loopermanUrl').textContent=url?`Source: ${url}`:"";
+  if(!loops.length){$('#results').innerHTML=`<div class="empty"><big>Aucun loop trouvé</big>Essaye un BPM plus large ou change de genre/key.<br><button class="btn btn-sm" style="margin-top:10px" onclick="doSearch()">Réessayer</button></div>`;return;}
+  $('#results').innerHTML=loops.map(loop=>{
+    const isSel=selected.has(loop.id);
+    return `<div class="card-loop ${isSel?'selected':''}" data-id="${loop.id}">
+      <div class="wave">${loop.waveform?`<img src="${loop.waveform}" loading="lazy" alt="">`:`<div style="color:var(--muted);font-size:12px">no waveform</div>`}
+        <button class="play" data-id="${loop.id}" onclick="playLoop('${loop.id}')">▶</button>
+        <div class="check ${isSel?'checked':''}" onclick="toggleSelect(currentLoops.find(l=>l.id==='${loop.id}'))">${isSel?'✓':'＋'}</div>
+        <div class="duration">▶ preview</div></div>
+      <div class="card-body">
+        <div class="card-title" title="${loop.title}">${loop.title}</div>
+        <div class="card-meta"><a href="${loop.author_url||'#'}" target="_blank" style="font-weight:700;color:white">👤 ${loop.author}</a><span>• ${loop.date||'récent'}</span>${loop.size?`<span>• ${loop.size}</span>`:''}</div>
+        <div class="tags">${loop.bpm?`<span class="tag bpm">${loop.bpm} BPM</span>`:''}${loop.key?`<span class="tag key">Key: ${loop.key}</span>`:''}${loop.genre?`<span class="tag genre">${loop.genre}</span>`:''}${loop.category?`<span class="tag">${loop.category}</span>`:''}<a class="tag" href="${loop.url}" target="_blank" style="text-decoration:none">↗ Looperman</a></div>
+        ${loop.description?`<div style="margin-top:8px;color:var(--muted);font-size:12px;line-height:1.4;max-height:36px;overflow:hidden">${loop.description}</div>`:''}
+        <div class="card-foot"><div class="card-foot-left"><span class="mini">#${loop.id}</span></div><div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="download" onclick='downloadOne(currentLoops.find(l=>l.id=="${loop.id}"))'>⬇ MP3</button>
+          <button class="download download-wav ${authState.logged_in?'enabled':''}" onclick='downloadWavOne(currentLoops.find(l=>l.id=="${loop.id}"))'>💎 WAV</button>
+          <button class="download" onclick='toggleSelect(currentLoops.find(l=>l.id=="${loop.id}"))' style="${isSel?'background:var(--green);color:black;border-color:var(--green)':''}">${isSel?'✓ Sélectionné':'＋ Sélectionner'}</button>
+        </div></div>
+      </div></div>`;
+  }).join('');updateSelectionUI();
+}
+async function doSearch(){
+  const genre=$('#fGenre').value,category=$('#fCategory').value,key=$('#fKey').value,bpm=$('#fBpm').value,limit=$('#fLimit').value,order=$('#fOrder').value,keyword=$('#fKeyword').value.trim();
+  const p=new URLSearchParams();if(genre)p.set('genre',genre);if(category)p.set('category',category);if(key)p.set('key',key);if(bpm)p.set('bpm',bpm);p.set('limit',limit);p.set('order',order);if(keyword)p.set('keyword',keyword);
+  const url=`/api/search?${p.toString()}`;setStatus("Recherche Looperman…",true);$('#endpoint').textContent=url;$('#results').innerHTML="";$('#countInfo').textContent="Recherche…";
+  try{const r=await fetch(url);if(!r.ok)throw new Error(`HTTP ${r.status}`);const d=await r.json();setStatus(`Trouvé • ${d.looperman_url}`,false);renderLoops(d.loops,d.looperman_url);}catch(e){setStatus("Erreur: "+e.message,false);$('#results').innerHTML=`<div class="empty"><big>Erreur</big>${e.message}</div>`;}
+}
+function doRandom(){const rg=["Trap","Hip Hop","House","Ambient","Lo-Fi","Phonk","Afrobeat","Drum And Bass","Jazz"];const rc=["Piano","Synth","Drum","Bells","Guitar Acoustic","Pad","Vocal"];const rk=["Am","Gm","Cm","Em","F#m"];const rb=[90,120,128,140,144,150];$('#fGenre').value=rg[Math.floor(Math.random()*rg.length)];$('#fCategory').value=rc[Math.floor(Math.random()*rc.length)];$('#fKey').value=rk[Math.floor(Math.random()*rk.length)];$('#fBpm').value=rb[Math.floor(Math.random()*rb.length)];updateChips();doSearch();}
+function initSelects(){const g=$('#fGenre');g.innerHTML=genresFull.map(v=>`<option value="${v}">${v||'— Tous genres —'}</option>`).join('');g.value="Trap";const c=$('#fCategory');c.innerHTML=categories.map(v=>`<option value="${v}">${v||'— Toutes catégories —'}</option>`).join('');const k=$('#fKey');k.innerHTML=keys.map(v=>`<option value="${v}">${v||'— Toutes keys —'}</option>`).join('');k.value="Am";updateChips();[g,c,k,$('#fBpm'),$('#fLimit'),$('#fOrder'),$('#fKeyword')].forEach(el=>{el.addEventListener('input',updateChips);el.addEventListener('change',updateChips);});}
+initSelects();checkHealth();refreshAuth();$('#fBpm').value=140;updateChips();
+$('#btnSearch').onclick=doSearch;$('#btnRandom').onclick=doRandom;$('#btnDownloadSelection').onclick=downloadSelection;$('#btnClear').onclick=()=>{selected.clear();updateSelectionUI();};
+$('#fKeyword').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});$('#fBpm').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+setTimeout(doSearch,500);
+</script>
+</body>
+</html>

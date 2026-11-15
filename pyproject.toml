@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loophaven"
+version = "0.1.0"
+description = "Local-first search API, CLI and MCP server for Looperman loops and acapella previews"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "LoopHaven contributors" }]
+keywords = [
+  "looperman",
+  "loops",
+  "samples",
+  "acapella",
+  "music-production",
+  "daw",
+  "reaper",
+  "mcp",
+  "fastapi",
+  "cli",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Framework :: FastAPI",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Multimedia :: Sound/Audio",
+]
+dependencies = [
+  "fastapi>=0.110,<1",
+  "uvicorn>=0.27,<1",
+  "requests>=2.31,<3",
+  "beautifulsoup4>=4.12,<5",
+  "lxml>=5.3,<7",
+  "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.0,<2"]
+dev = ["pytest>=8,<9", "httpx>=0.27,<0.29"]
+release = ["build>=1.2,<2", "twine>=5,<7"]
+
+[project.scripts]
+haven = "loophaven.cli:main"
+loophaven-mcp = "loophaven.mcp_server:main"
+loop-haven-mcp = "loophaven.mcp_server:main"
+
+[project.urls]
+Homepage = "https://github.com/mohamed-amine-ben-mallessa/loop-haven"
+Repository = "https://github.com/mohamed-amine-ben-mallessa/loop-haven"
+Issues = "https://github.com/mohamed-amine-ben-mallessa/loop-haven/issues"
+Documentation = "https://github.com/mohamed-amine-ben-mallessa/loop-haven/tree/main/docs"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["loophaven*"]

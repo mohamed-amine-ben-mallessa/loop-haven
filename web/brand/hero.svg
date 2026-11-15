@@ -1,0 +1,75 @@
+<svg width="1280" height="400" viewBox="0 0 1280 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LoopHaven — search Looperman from your terminal or your agent">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14100C"/>
+      <stop offset="55%" stop-color="#0C0906"/>
+      <stop offset="100%" stop-color="#161009"/>
+    </linearGradient>
+    <linearGradient id="flame" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFB347"/>
+      <stop offset="50%" stop-color="#FF7A00"/>
+      <stop offset="100%" stop-color="#FF3B18"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FF7A00"/>
+      <stop offset="100%" stop-color="#FF7A00" stop-opacity="0.15"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <rect width="1280" height="400" rx="26" fill="url(#bg)"/>
+
+  <g opacity="0.10" stroke="#FF7A00" stroke-width="1">
+    <path d="M0 100 H1280 M0 200 H1280 M0 300 H1280"/>
+    <path d="M160 0 V400 M480 0 V400 M800 0 V400 M1120 0 V400"/>
+  </g>
+
+  <!-- waveform -->
+  <g transform="translate(72, 148)">
+    <g fill="url(#bar)">
+      <rect x="0" y="30" width="10" height="44" rx="5"/>
+      <rect x="22" y="12" width="10" height="80" rx="5"/>
+      <rect x="44" y="42" width="10" height="20" rx="5"/>
+      <rect x="66" y="0" width="10" height="104" rx="5"/>
+      <rect x="88" y="26" width="10" height="52" rx="5"/>
+      <rect x="110" y="8" width="10" height="88" rx="5"/>
+      <rect x="132" y="38" width="10" height="28" rx="5"/>
+      <rect x="154" y="18" width="10" height="68" rx="5"/>
+      <rect x="176" y="46" width="10" height="12" rx="5"/>
+    </g>
+    <circle cx="90" cy="52" r="52" fill="#FF7A00" opacity="0.16" filter="url(#soft)"/>
+  </g>
+
+  <!-- wordmark -->
+  <g transform="translate(320, 130)">
+    <text x="0" y="0" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="4.5" fill="#FF9A3C">UNOFFICIAL LOOPERMAN CLIENT</text>
+    <text x="0" y="62" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="68" font-weight="800" letter-spacing="-2.2" fill="#FFFFFF">LoopHaven</text>
+    <text x="2" y="104" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="21" fill="#B9B0A5">Search, filter and pull loops — from your terminal or your agent.</text>
+
+    <g transform="translate(0, 140)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">
+      <g>
+        <rect x="0" y="0" width="176" height="38" rx="19" fill="#1C1712" stroke="#33291F"/>
+        <text x="16" y="24" fill="#FFC48A">GET /api/search</text>
+      </g>
+      <g transform="translate(190, 0)">
+        <rect x="0" y="0" width="150" height="38" rx="19" fill="#1C1712" stroke="#33291F"/>
+        <text x="16" y="24" fill="#EDE7DF">haven search</text>
+      </g>
+      <g transform="translate(354, 0)">
+        <rect x="0" y="0" width="88" height="38" rx="19" fill="url(#flame)"/>
+        <text x="20" y="24" fill="#1A0F05" font-weight="700">MCP</text>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(72, 344)" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12" fill="#6F665C">
+    <text x="0" y="0">69 genres · 40 categories · 24 keys · BPM · time signature · licence labels</text>
+  </g>
+  <g transform="translate(1080, 344)">
+    <rect x="0" y="-18" width="128" height="26" rx="13" fill="#1C1712" stroke="#33291F"/>
+    <circle cx="14" cy="-5" r="4.5" fill="#1ED760"/>
+    <text x="26" y="0" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="11" fill="#B9B0A5">local first</text>
+  </g>
+</svg>

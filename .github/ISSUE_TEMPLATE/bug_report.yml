@@ -1,0 +1,73 @@
+name: Bug report
+description: Something returns the wrong data, breaks on a page, or fails to download.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Never paste cookies, `.env` contents, your email or
+        your password.** If a page fails to parse, describe the HTML structure
+        (tags and classes), not a full dump.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The route or command, the parameters, and the result you got.
+      placeholder: |
+        GET /api/search?genre=Phonk&bpm=140&limit=2
+        → count: 0, but the website shows 25 results
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. python -m uvicorn loophaven.api.app:app --port 8000
+        2. curl "..."
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: traceback
+    attributes:
+      label: Traceback / response body
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: "0.1.0, or the commit sha"
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where does it happen?
+      multiple: true
+      options:
+        - HTTP API
+        - CLI (haven)
+        - MCP server
+        - Browser prototype (/)
+        - Docs
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I did not include credentials, cookies or personal data.
+          required: true
+        - label: This is not a request to bypass a quota or a rate limit.
+          required: true

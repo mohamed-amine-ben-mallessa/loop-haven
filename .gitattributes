@@ -1,0 +1,19 @@
+# Normalise line endings in the repository; check out native on Windows.
+* text=auto eol=lf
+
+*.py text
+*.md text
+*.toml text
+*.yml text
+*.yaml text
+*.json text
+*.svg text
+*.html text
+*.txt text
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

@@ -1,0 +1,45 @@
+name: Feature request
+description: A filter, route, tool or workflow that is missing.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the production or agent workflow, not just the feature.
+      placeholder: |
+        I want to find loops that fit a 140 BPM drill track and only keep
+        ones whose licence allows commercial use.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would help
+      description: A route, a CLI flag, an MCP tool, a doc…
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Search / filters
+        - Downloads / ZIP
+        - CLI
+        - MCP server
+        - Documentation
+        - Browser UI
+        - Other
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This does not require bypassing quotas, rate limits, or account rules.
+          required: true
+        - label: This does not involve redistributing Looperman audio.
+          required: true

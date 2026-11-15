@@ -1,0 +1,6 @@
+fastapi>=0.110,<1
+uvicorn>=0.27,<1
+requests>=2.31,<3
+beautifulsoup4>=4.12,<5
+lxml>=5.3,<7
+python-multipart>=0.0.9

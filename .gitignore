@@ -1,0 +1,44 @@
+# secrets and local sessions
+.env
+.env.*
+!.env.example
+cookies.txt
+session.json
+csrf.txt
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# audio and archives — never commit third-party content
+*.wav
+*.mp3
+*.aiff
+*.flac
+*.zip
+*.rar
+*.7z
+examples/**/media/
+examples/**/zips/
+downloads/
+haven/downloads/
+
+# local scratch (kept outside the published tree)
+_local/
+
+# os / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.log

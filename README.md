@@ -24,8 +24,9 @@ file you picked — from your terminal or from an AI agent.
 
 ## Why this exists
 
-Looperman has ~700k loops and no public API. Every "scraper" out there stops at
-"here is some HTML". LoopHaven does three things differently:
+Looperman hosts a huge community sample library and has no public API. Every
+"scraper" out there stops at "here is some HTML". LoopHaven does three things
+differently:
 
 1. **It speaks the site's own filter vocabulary.** Genre, category, key, time
    signature, tempo range, date window, sort order — resolved from the real

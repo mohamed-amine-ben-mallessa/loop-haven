@@ -7,6 +7,7 @@
 Search loops and acapella previews with real filters, get clean JSON, and pull the
 file you picked — from your terminal or from an AI agent.
 
+[![PyPI](https://img.shields.io/pypi/v/loophaven?logo=pypi&logoColor=white)](https://pypi.org/project/loophaven/)
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![tests](https://github.com/mohamed-amine-ben-mallessa/loop-haven/actions/workflows/ci.yml/badge.svg)](https://github.com/mohamed-amine-ben-mallessa/loop-haven/actions/workflows/ci.yml)
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?logo=fastapi&logoColor=white)](src/loophaven/api/app.py)
@@ -39,12 +40,21 @@ differently:
    CLI, and an optional MCP server so Claude, Cursor or any MCP client can
    search and fetch material on your behalf.
 
+<div align="center">
+
+<a href="https://www.looperman.com"><img src="web/brand/looperman-mark.png" alt="Looperman" width="64" height="64"></a>
+
+<strong>Built on top of Looperman</strong>
+
+<sub>Unofficial · not affiliated with or endorsed by Looperman Ltd.<br>
+The name and logo are trademarks of their owner, used only to identify the site this tool reads.</sub>
+
+</div>
+
 ## Quickstart
 
 ```bash
-git clone https://github.com/mohamed-amine-ben-mallessa/loop-haven.git
-cd loop-haven
-python -m pip install -e ".[mcp]"
+pip install "loophaven[mcp]"
 
 # 1. start the local API
 python -m uvicorn loophaven.api.app:app --host 127.0.0.1 --port 8000
@@ -52,6 +62,9 @@ python -m uvicorn loophaven.api.app:app --host 127.0.0.1 --port 8000
 # 2. search (public previews need no account)
 curl "http://127.0.0.1:8000/api/search?genre=Trap&bpm=140&limit=2"
 ```
+
+Working on the code instead? `git clone https://github.com/mohamed-amine-ben-mallessa/loop-haven.git`,
+then `python -m pip install -e ".[dev,mcp]"` — nothing else changes.
 
 A real response, trimmed:
 
@@ -142,6 +155,10 @@ How the site's internals were mapped: [docs/REVERSE-ENGINEERING.md](docs/REVERSE
 Tools: `search_loops`, `search_acapellas`, `get_acapella_detail`,
 `get_preview_url`, `export_loop_zip`, `toggle_favorite`. The agent sees JSON,
 never HTML.
+
+There is also a ready-made skill in [`skills/loop-haven/SKILL.md`](skills/loop-haven/SKILL.md)
+that teaches an agent the etiquette: preview before download, respect the
+licence label, never bulk-scrape.
 
 There is also a ready-made skill in [`skills/loop-haven/SKILL.md`](skills/loop-haven/SKILL.md)
 that teaches an agent the etiquette: preview before download, respect the

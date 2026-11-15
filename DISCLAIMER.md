@@ -39,6 +39,14 @@ The software is provided "as is", without warranty of any kind. Looperman's
 markup changes without notice; the parser may break, return partial data, or
 misread a field. Verify what matters to you before using a file in a release.
 
+## Trademarks and third-party assets
+
+"Looperman" and the Looperman logo are trademarks of their owner. The logo file
+`web/brand/looperman-mark.png` is included only to identify the site this
+software reads, under a nominative use: it does not imply any affiliation,
+partnership, sponsorship or endorsement, and it is **not** covered by the MIT
+licence that applies to the code.
+
 ## If you are a rights holder
 
 If you own Looperman, or content hosted there, and you believe this project

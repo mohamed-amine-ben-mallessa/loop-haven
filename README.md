@@ -188,6 +188,10 @@ vocabulary — **69 genres, 40 categories, 24 keys**.
 
 - **This is a wrapper, not an API.** If Looperman changes its HTML, parsing
   breaks. That is the whole reason the reverse-engineering notes are in the repo.
+  Three standalone write-ups cover the parts that cost the most time:
+  [the hidden search form](https://gist.github.com/mohamed-amine-ben-mallessa/03c051d6184044f72298466ef1df0c9e),
+  [the DOM traps](https://gist.github.com/mohamed-amine-ben-mallessa/d80cf3eeea46178e0206dbfcfb98f6f6)
+  and [checking a session honestly](https://gist.github.com/mohamed-amine-ben-mallessa/44aba43ba111189bc5aa0b10ea71baea).
 - **`total` is `null` after page 1.** Looperman caps the displayed count at
   5,000 and stops showing it on later pages. LoopHaven reports that instead of
   inventing a number.

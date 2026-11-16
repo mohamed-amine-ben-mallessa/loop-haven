@@ -157,7 +157,7 @@ def _page_window(html):
     """Result window + honest total.
 
     Looperman only prints "Loops 1 - 25 of N" on the first page, and caps N at
-    5,000. Small result sets omit that counter but print "Showing 4 ... loops".
+    5,000. Small result sets print "Showing 4 ... loops" or "Showing 1 ... loop".
     Later pages carry neither, so they report None instead of inventing a total.
     """
     text = BeautifulSoup(html, "lxml").get_text(" ", strip=True)
@@ -168,7 +168,7 @@ def _page_window(html):
                 "to": int(match.group(2).replace(",", "")),
                 "total": total,
                 "total_capped": total >= filters.TOTAL_CAP}
-    showing = re.search(r"Showing\s+([\d,]+)\s+[^.]{0,80}?(?:loops|acapellas)\b", text, re.I)
+    showing = re.search(r"Showing\s+([\d,]+)\s+[^.]{0,80}?(?:loops?|acapellas)\b", text, re.I)
     if showing:
         total = int(showing.group(1).replace(",", ""))
         return {"from": 1, "to": total, "total": total,

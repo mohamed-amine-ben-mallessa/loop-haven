@@ -149,6 +149,23 @@ LOOP_FIXTURE = '''
 '''
 
 
+def _loop_listing_fixture(records, counter):
+    cards = [
+        f'''
+        <div data-mp3="https://fixtures.invalid/loops/{loop_id}.mp3"></div>
+        <div class="player-wrapper"><div class="card bg-player">
+         <a class="player-title" href="/loops/detail/{loop_id}/fixture-{loop_id}">Fixture {loop_id}</a>
+        </div></div>
+        <div class="tag-wrapper">
+         <a data-bs-title="Find more loops at {bpm} bpm">{bpm} bpm</a>
+         <a data-bs-title="This loop is in the key of {key}">Key : {key}</a>
+        </div>
+        '''
+        for loop_id, bpm, key in records
+    ]
+    return '<div class="col-12">' + "".join(cards) + f"</div><p>{counter}</p>"
+
+
 class LoopParseTests(unittest.TestCase):
     def test_loop_card_exposes_duration_stats_and_clean_author_url(self):
         class FakeResponse:
@@ -231,6 +248,47 @@ class LoopParseTests(unittest.TestCase):
         self.assertEqual(second["author"], "Bob")
         self.assertEqual(second["favorite_hash"], "hash2")
 
+    def test_full_page_in_one_column_keeps_first_and_last_loop_fields(self):
+        middle = [(loop_id, 90 + loop_id, "Am") for loop_id in range(2, 25)]
+        fixture = _loop_listing_fixture(
+            [(1, 90, "C"), *middle, (25, 128, "Bm")], "Loops 1 - 25 of 50")
+
+        class FakeResponse:
+            text = fixture
+
+            def raise_for_status(self):
+                pass
+
+        scraper.clear_cache()
+        with patch.object(scraper.requests, "get", return_value=FakeResponse()):
+            result = scraper.scrape_loops("https://www.looperman.com/loops?fixture=full", limit=25)
+
+        self.assertEqual([item["id"] for item in result["loops"]], [str(i) for i in range(1, 26)])
+        first, last = result["loops"][0], result["loops"][-1]
+        self.assertEqual((first["bpm"], first["key"], first["mp3_url"]),
+                         (90, "C", "https://fixtures.invalid/loops/1.mp3"))
+        self.assertEqual((last["bpm"], last["key"], last["mp3_url"]),
+                         (128, "Bm", "https://fixtures.invalid/loops/25.mp3"))
+
+    def test_single_loop_uses_singular_showing_counter(self):
+        fixture = _loop_listing_fixture([(1, 90, "C")], "Showing 1 90 bpm Piano loop")
+
+        class FakeResponse:
+            text = fixture
+
+            def raise_for_status(self):
+                pass
+
+        scraper.clear_cache()
+        with patch.object(scraper.requests, "get", return_value=FakeResponse()):
+            result = scraper.scrape_loops("https://www.looperman.com/loops?fixture=single", limit=2)
+
+        self.assertEqual(result["count"], 1)
+        self.assertEqual(result["page"], {
+            "from": 1, "to": 1, "per_page": 1,
+            "total": 1, "total_pages": 1, "total_capped": False,
+        })
+
     def test_two_acapellas_in_one_shared_col12_do_not_share_data(self):
         """Same regression test for acapellas: each item must get its own mp3, tags, etc."""
         fixture = '''
@@ -244,6 +302,7 @@ class LoopParseTests(unittest.TestCase):
          </div>
          <div class="tag-wrapper">
           <a data-bs-title="Find more acapellas at 129 bpm">129 bpm</a>
+          <a data-bs-title="This acapella is in the key of Dm">Key : Dm</a>
           <a data-bs-title="Genre : Trap Acapellas and Vocals">Trap</a>
           <a data-bs-title="This acapella contains Male vocals">Male</a>
           <a data-bs-title="The vocal style of this acapella is Rapping">Rapping</a>
@@ -281,6 +340,7 @@ class LoopParseTests(unittest.TestCase):
         first, second = result["acapellas"]
         self.assertEqual(first["title"], "First Vocal")
         self.assertEqual(first["bpm"], 129)
+        self.assertEqual(first["key"], "Dm")
         self.assertEqual(first["gender"], "male")
         self.assertEqual(first["style"], "Rapping")
         self.assertEqual(first["type"], "Full Song")
@@ -292,6 +352,7 @@ class LoopParseTests(unittest.TestCase):
 
         self.assertEqual(second["title"], "Second Vocal")
         self.assertEqual(second["bpm"], 165)
+        self.assertIsNone(second["key"])
         self.assertEqual(second["gender"], "female")
         self.assertEqual(second["style"], "Singing")
         self.assertEqual(second["type"], "Hook")
@@ -352,19 +413,30 @@ class DownloadTests(unittest.TestCase):
         with self.assertRaises(scraper.RateLimited):
             scraper.download_media("https://www.looperman.com/getfiles/loops/v1-x", session=FakeSession())
 
-    def test_html_body_is_not_mistaken_for_audio(self):
+    def test_success_status_quota_page_is_not_opened_as_a_file(self):
         class FakeResponse:
             status_code = 200
-            headers = {"content-type": "text/html"}
+            headers = {"content-type": "text/html; charset=UTF-8"}
+            closed = False
+
             def iter_content(self, size):
-                yield b"<html>quota</html>"
+                yield b"<html><main><h1>Daily download quota reached</h1></main></html>"
+
             def close(self):
-                pass
+                self.closed = True
+
+        response = FakeResponse()
+
         class FakeSession:
             def get(self, *args, **kwargs):
-                return FakeResponse()
-        with self.assertRaises(scraper.NotAudio):
-            scraper.download_media("https://www.looperman.com/getfiles/loops/v1-x", session=FakeSession())
+                return response
+
+        with patch("builtins.open") as open_file, patch("io.open") as open_path:
+            with self.assertRaisesRegex(scraper.NotAudio, "Daily download quota reached"):
+                scraper.download_media("https://www.looperman.com/getfiles/loops/v1-x", session=FakeSession())
+        self.assertTrue(response.closed)
+        open_file.assert_not_called()
+        open_path.assert_not_called()
 
     def test_upstream_filename_wins(self):
         response = self._response(200, "audio/wav", {

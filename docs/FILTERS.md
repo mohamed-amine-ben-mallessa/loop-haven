@@ -32,8 +32,16 @@ Unknown values return `422` with suggestions instead of an empty page.
 | `limit` | — | results returned by LoopHaven (1–50, default 10) |
 | `keyword` | `keys` | `+include -exclude` |
 | `mid` | `mid` | only items from this user id |
-| `who` | `who` | followed-only / remove-ignored (unverified) |
+| `who` | `who` | `1` followed only, `2` remove ignored — verified, see below |
 | `favs` | `favs` | your favourites only (needs login) |
+
+`who` was unverified for a long time because it needs an account that follows
+people. Measured on 16 November 2026 on an account that follows nobody: the
+unfiltered search returned 5 results, `who=1` returned **0**, and `who=2`
+returned the same 5. So `who=1` filters — an account following nobody gets
+nothing — while `who=2` is consistent but unproven on its own, since there was
+nothing ignored to remove. The numbers are in
+[REVERSE-ENGINEERING.md](REVERSE-ENGINEERING.md) §6.
 
 ---
 

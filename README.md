@@ -116,12 +116,17 @@ curl "http://127.0.0.1:8000/api/download/info/loop/436799"
 
 # log in with your own account, then download (WAV for loops, MP3 for acapellas)
 haven login
-curl -OJ "http://127.0.0.1:8000/api/download/audio/loop/436799"
+haven download --id 436799                 # saves under the upstream filename
+haven download --id 24926 --kind acapella --out vocals.mp3
 
 # audition a preview, toggle a favourite
 haven play --id 436799
 haven fav --hash <favorite_hash> --type loop
 ```
+
+`haven download` asks `/api/download/info` first and prints the format, size and
+availability before spending anything. It exits `2` with a reason when there is
+no session or the quota is spent, and it never retries a `429`.
 
 `haven login` prompts locally and never stores your password. The session
 cookie is persisted so a server restart does not log you out.

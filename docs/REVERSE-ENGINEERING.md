@@ -97,8 +97,10 @@ Useful consequences:
 - **`did` (DAW) is not a filter.** It appears on cards, it is ignored by the
   search. LoopHaven exposes it as a card field only. Filtering on it returns
   unrelated results, which is a subtle way to ship a broken feature.
-- **`who` (followed users) had no observable effect** on an account that follows
-  nobody. It is exposed but documented as unverified.
+- **`who` (followed users) does filter.** On an account that follows nobody,
+  `who=1` returns 0 results where the same search without it returns 5 — the
+  filter working, not an ignored parameter. `who=2` returned the identical set
+  because nothing was ignored. Numbers and caveats in §6.
 
 ---
 
@@ -207,9 +209,43 @@ farm plays.
 
 ## 6. What is still unknown
 
-- Whether `who=1|2` does anything on an account that follows people.
 - The exact rate-limit window for downloads (observed: daily, per item).
-- Whether acapellas are ever served as anything other than MP3 — never observed.
 - How the advanced-search token behaves after long idle periods.
 
 If you measure one of these, a PR to this file is as valuable as a code PR.
+
+### Measured on 16 November 2026
+
+Two items that used to be listed here are settled. Both were checked against a
+real logged-in account, and the raw numbers are below so they can be re-run
+rather than trusted.
+
+**`who=1|2` does filter.** The same search with and without the parameter, on
+an account that follows nobody:
+
+| Request | `count` |
+|---|---|
+| `/api/search?limit=5` | 5 (total 5,000) |
+| `/api/search?who=1&limit=5` | **0** |
+| `/api/search?who=1&limit=5&order=downloads` | **0** |
+| `/api/search?who=2&limit=5` | 5 |
+
+`who=1` is "followed only", so an account that follows nobody gets nothing —
+that is the filter doing its job, not an ignored parameter. `who=2` is "remove
+ignored"; it returned the identical id list because the account ignores nobody
+either, so it is consistent but not independently proven to filter. If you want
+to finish that half, ignore a loop and re-run the same comparison.
+
+**Acapellas are always MP3.** Three items reported `expected_format: "mp3"`
+from `/api/download/info/acapella/{id}`, and two of them were downloaded and
+inspected:
+
+| id | `Content-Type` | `X-Audio-Format` | first bytes |
+|---|---|---|---|
+| 24926 | `audio/mpeg` | `mp3` | `ID3` |
+| 24860 | `audio/mpeg` | `mp3` | `ID3` |
+
+No WAV was observed for an acapella, whatever the request asks for. The
+filename in `Content-Disposition` also ends in `.mp3`
+(`looperman-a-8294181-0024926-library-of-the-mind.mp3`).
+

@@ -5,6 +5,7 @@ import argparse
 import getpass
 import json
 import os
+import re
 import sys
 import webbrowser
 from pathlib import Path
@@ -30,6 +31,59 @@ def request(api: str, path: str, *, params=None, payload=None, raw=False):
         raise RuntimeError(f"API {exc.code}: {message}") from exc
     except URLError as exc:
         raise RuntimeError(f"API unreachable ({url}). Start LoopHaven first: {exc}") from exc
+
+
+def _upstream_filename(headers):
+    """The filename the API forwarded, reduced to a bare name.
+
+    The header comes from Looperman, so it is untrusted input: only the last
+    path component is kept, which stops a `../` in the header from choosing
+    where the file lands.
+    """
+    disposition = headers.get("Content-Disposition") or ""
+    match = re.search(r'filename\*?=(?:UTF-8\'\')?"?([^";]+)"?', disposition)
+    if not match:
+        return None
+    return Path(match.group(1).strip()).name or None
+
+
+def download_file(api: str, kind: str, item_id: str, out=None, timeout=120):
+    """Stream one item to disk. Returns (path, bytes written, upstream name).
+
+    A partial file is removed rather than left behind: a truncated WAV that
+    looks like a download is worse than a visible failure.
+    """
+    url = f"{api.rstrip('/')}/api/download/audio/{kind}/{item_id}"
+    try:
+        response = urlopen(Request(url), timeout=timeout)
+    except HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace").strip()
+        if exc.code == 429:
+            raise RuntimeError(
+                "429 from Looperman: the download quota is exhausted. Wait, do not retry."
+            ) from exc
+        raise RuntimeError(f"API {exc.code}: {body}") from exc
+    except URLError as exc:
+        raise RuntimeError(f"API unreachable ({url}). Start LoopHaven first: {exc}") from exc
+
+    with response:
+        upstream = _upstream_filename(response.headers)
+        target = Path(out) if out else Path(upstream or f"{kind}_{item_id}.bin")
+        if target.parent != Path(""):
+            target.parent.mkdir(parents=True, exist_ok=True)
+        written = 0
+        try:
+            with target.open("wb") as handle:
+                while True:
+                    chunk = response.read(64 * 1024)
+                    if not chunk:
+                        break
+                    handle.write(chunk)
+                    written += len(chunk)
+        except BaseException:
+            target.unlink(missing_ok=True)
+            raise
+    return target, written, upstream
 
 
 def build_parser():
@@ -68,6 +122,11 @@ def build_parser():
     p_zip.add_argument("--ids", nargs="+", required=True)
     p_zip.add_argument("--format", choices=["mp3", "wav"], default="mp3")
     p_zip.add_argument("--output", default="loop-haven-pack.zip")
+
+    p_dl = sub.add_parser("download", help="Save one item to a file; checks availability first")
+    p_dl.add_argument("--id", required=True, help="Looperman item id")
+    p_dl.add_argument("--kind", choices=["loop", "acapella"], default="loop")
+    p_dl.add_argument("--out", help="Destination path (default: the filename the API forwards)")
 
     p_play = sub.add_parser("play", help="Open an audio preview in the browser")
     p_play.add_argument("--url", help="Preview MP3 URL from the JSON results")
@@ -131,6 +190,33 @@ def main(argv=None):
             content = request(api, "/api/download/zip", payload={"ids": args.ids, "format": args.format, "filename": Path(args.output).name}, raw=True)
             Path(args.output).write_bytes(content)
             print(f"ZIP written: {args.output} ({len(content)} bytes)")
+            return 0
+
+        if args.command == "download":
+            if not args.id.isdigit():
+                parser.error("the id must be numeric")
+            info = request(api, f"/api/download/info/{args.kind}/{args.id}")
+            print(
+                f"{info.get('title') or f'{args.kind} {args.id}'} - "
+                f"{(info.get('expected_format') or '?').upper()}, "
+                f"{info.get('size_hint') or 'unknown size'}, "
+                f"{info.get('bpm') or '?'} BPM, {info.get('key') or '?'} key"
+            )
+            if not info.get("download_available"):
+                if not info.get("logged_in"):
+                    print(
+                        "haven: no Looperman session. A WAV needs your own account: run `haven login`.",
+                        file=sys.stderr,
+                    )
+                else:
+                    print(
+                        "haven: not available right now -- usually the daily quota. "
+                        "Wait, do not retry.",
+                        file=sys.stderr,
+                    )
+                return 2
+            target, written, upstream = download_file(api, args.kind, args.id, out=args.out)
+            print(f"Saved {target} ({written} bytes)" + (f" from {upstream}" if upstream else ""))
             return 0
 
         if args.command == "play":

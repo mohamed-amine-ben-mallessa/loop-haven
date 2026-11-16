@@ -65,7 +65,7 @@ Shortcuts for one vocabulary at a time.
 | `ppage` | int | — | upstream page size: 25, 50, 100 |
 | `limit` | int | `10` | results returned, 1–50 |
 | `mid` | str | — | only this author id |
-| `who` | int | — | `1` followed only, `2` remove ignored (unverified) |
+| `who` | int | — | `1` followed only, `2` remove ignored (verified, see [FILTERS.md](FILTERS.md)) |
 | `favs` | bool | `false` | your favourites (needs a session) |
 
 ```bash

@@ -3,6 +3,27 @@
 All notable changes to this project. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions use semver.
 
+## [Unreleased]
+
+### Added
+- `haven download --id <id> [--kind loop|acapella] [--out PATH]`. It asks
+  `/api/download/info` first and prints the format, size and availability, so a
+  refusal costs nothing: exit `2` with a reason when there is no session, or
+  when the quota is spent. It streams to the filename the API forwards (only
+  the basename is kept, so a `../` in that header cannot choose the
+  destination), deletes a partial file instead of leaving a truncated WAV, and
+  never retries a `429`.
+- The browser prototype at `/` is in English. It was a French pilot page on an
+  otherwise English project, which is a strange first impression for a visitor
+  arriving from the README.
+
+### Fixed
+- Two long-standing "unknown" entries in `docs/REVERSE-ENGINEERING.md` are now
+  measured rather than assumed: `who=1` does filter (0 results on an account
+  that follows nobody, where the same search returns 5), and an acapella is
+  always an MP3 (`audio/mpeg`, `ID3` header, on two downloaded items). The raw
+  numbers are in §6 so the check can be re-run.
+
 ## [0.1.1] - 2026-11-16
 
 Metadata and documentation release; the API is unchanged from 0.1.0.

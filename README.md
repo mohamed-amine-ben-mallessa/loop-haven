@@ -16,12 +16,15 @@ file you picked — from your terminal or from an AI agent.
 
 </div>
 
-> **Unofficial project.** LoopHaven is not affiliated with, endorsed by, or
-> supported by Looperman. It reads public pages and your own session, at human
-> pace. It does not redistribute audio and does not bypass quotas.
-> Read [DISCLAIMER.md](DISCLAIMER.md) before using it.
+# LoopHaven — an unofficial Looperman API, CLI and MCP server
 
----
+Looperman has no public API. LoopHaven is a local-first wrapper around the site: a
+FastAPI service, a `haven` CLI and an MCP server that expose its real search
+filters as clean JSON, so you can find loops and acapella previews and pull the
+file you picked — from Python, from your terminal, or from an AI agent.
+
+It is not affiliated with Looperman. Downloads use your own account and its
+quota, at human pace; nothing here redistributes audio or works around a limit.
 
 ## Why this exists
 
@@ -50,6 +53,13 @@ differently:
 The name and logo are trademarks of their owner, used only to identify the site this tool reads.</sub>
 
 </div>
+
+> **Unofficial project.** LoopHaven is not affiliated with, endorsed by, or
+> supported by Looperman. It reads public pages and your own session, at human
+> pace. It does not redistribute audio and does not bypass quotas.
+> Read [DISCLAIMER.md](DISCLAIMER.md) before using it.
+
+---
 
 ## Quickstart
 

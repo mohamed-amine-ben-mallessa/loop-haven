@@ -88,7 +88,7 @@
       session on your own machine and streams the resulting file.</p>
     </div>
 
-    <p class="meta">Verified against the live site on 16 November 2026 · LoopHaven 0.1.1</p>
+    <p class="meta">Verified against the live site on 16 November 2026 · LoopHaven 0.2.0</p>
 
     <h2>There are two different files, and only one is free</h2>
 
@@ -128,7 +128,16 @@ python -m uvicorn loophaven.api.app:app --host 127.0.0.1 --port 8000
 haven login
 
 # what a download would give you — free, spends no quota
-curl "http://127.0.0.1:8000/api/download/info/loop/436799"</code></pre>
+curl "http://127.0.0.1:8000/api/download/info/loop/436799"
+
+# then take the file, in one step
+haven download --id 436799
+haven download --id 24926 --kind acapella --out vocals.mp3</code></pre>
+
+    <p><code>haven download</code> asks the <code>info</code> route first and
+    prints the format, size and availability, so a refusal costs nothing. It
+    exits <code>2</code> with the reason when there is no session or the quota is
+    spent, and it never retries a <code>429</code>.</p>
 
     <p>The <code>info</code> route exists so you can decide before spending
     anything:</p>

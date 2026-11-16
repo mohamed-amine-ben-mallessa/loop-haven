@@ -3,7 +3,7 @@
 All notable changes to this project. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions use semver.
 
-## [Unreleased]
+## [0.2.0] - 2026-11-16
 
 ### Added
 - `haven download --id <id> [--kind loop|acapella] [--out PATH]`. It asks

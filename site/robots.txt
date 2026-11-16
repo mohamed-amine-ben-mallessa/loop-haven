@@ -1,0 +1,13 @@
+# LoopHaven documentation.
+#
+# Honest caveat: this project site is served from a subpath
+# (/loop-haven/), and crawlers only honour a robots.txt at the domain root
+# (mohamed-amine-ben-mallessa.github.io/robots.txt), which this repository
+# does not control. This file is therefore documentation, not enforcement.
+# Indexability is controlled by the <meta name="robots"> tags in each page
+# and by sitemap.xml.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://mohamed-amine-ben-mallessa.github.io/loop-haven/sitemap.xml

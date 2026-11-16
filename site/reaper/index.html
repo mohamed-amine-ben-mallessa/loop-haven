@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LoopHaven in REAPER: get a Looperman preview into a project — LoopHaven</title>
+<meta name="description" content="REAPER's Lua has no HTTP client, so the honest route is a local endpoint plus reaper.ExecProcess. A short ReaScript to fetch a preview or a WAV into a project media folder, and what it deliberately does not do.">
+<link rel="canonical" href="https://mohamed-amine-ben-mallessa.github.io/loop-haven/reaper/">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LoopHaven">
+<meta property="og:title" content="LoopHaven in REAPER: a preview in your project folder">
+<meta property="og:description" content="A local endpoint plus reaper.ExecProcess is the only honest way to reach Looperman from ReaScript. Code, caveats, and what is not tested.">
+<meta property="og:url" content="https://mohamed-amine-ben-mallessa.github.io/loop-haven/reaper/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/reaper/#article",
+      "headline": "Getting a Looperman loop into REAPER",
+      "description": "REAPER's ReaScript Lua has no HTTP client. Reaching Looperman from a DAW means a local HTTP API plus reaper.ExecProcess, not a plugin that talks to the site directly.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-16",
+      "dateModified": "2026-11-16",
+      "author": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author" },
+      "isPartOf": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website" },
+      "about": { "@type": "Thing", "name": "REAPER" },
+      "mentions": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author",
+      "name": "LoopHaven contributors",
+      "url": "https://github.com/mohamed-amine-ben-mallessa"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website",
+      "url": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/",
+      "name": "LoopHaven"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software",
+      "name": "LoopHaven",
+      "applicationCategory": "DeveloperApplication",
+      "license": "https://opensource.org/licenses/MIT",
+      "codeRepository": "https://github.com/mohamed-amine-ben-mallessa/loop-haven"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5" fill="currentColor" opacity=".12"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 12h2.2M17.8 12H20"/><path d="M8.1 7.4v9.2M12 4.6v14.8M15.9 8.6v6.8"/></g></svg>
+      LoopHaven
+    </a>
+    <nav class="site-nav">
+      <a href="../looperman-api/">Looperman API</a>
+      <a href="../download-loops-python/">Python</a>
+      <a href="../mcp/">MCP</a>
+      <a href="../filters/">Filters</a>
+      <a href="../reaper/">REAPER</a>
+      <a href="../limits/">Limits</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <h1>Getting a Looperman loop into REAPER</h1>
+
+    <div class="answer">
+      <p><strong>There is no Looperman plugin for REAPER, and there cannot honestly
+      be one that talks to the site directly.</strong> ReaScript's Lua ships no
+      HTTP client and no HTML parser. The workable shape is a local server that
+      does the fetching, plus a short script that asks it for a file and inserts
+      the result. That is what LoopHaven is for — the DAW side stays three lines
+      of <code>reaper.ExecProcess</code>.</p>
+    </div>
+
+    <p class="meta">LoopHaven 0.1.0 · the ReaScript below is provided as a starting point, not as a tested add-on</p>
+
+    <h2>Why the DAW cannot do this itself</h2>
+
+    <table>
+      <thead><tr><th>What the task needs</th><th>ReaScript Lua has</th></tr></thead>
+      <tbody>
+        <tr><td>HTTP request with cookies</td><td>Nothing built in</td></tr>
+        <tr><td>Scrape a filter form</td><td>Nothing built in</td></tr>
+        <tr><td>Run a process</td><td><code>reaper.ExecProcess</code></td></tr>
+        <tr><td>Place a file on a track</td><td><code>reaper.InsertMedia</code></td></tr>
+      </tbody>
+    </table>
+
+    <p>Two of four is enough if you stop trying to make the DAW smart. The split
+    that works: the local API knows the site, the script knows the project.</p>
+
+    <h2>Step 1 — run the local API</h2>
+
+<pre><code>pip install "loophaven[mcp]"
+python -m uvicorn loophaven.api.app:app --host 127.0.0.1 --port 8000
+
+# the file you want, chosen once, outside the DAW
+curl "http://127.0.0.1:8000/api/download/info/loop/436799"</code></pre>
+
+    <p>Keep the port on loopback. The server has no authentication, by design: it
+    is a personal local service, not something to expose on a network.</p>
+
+    <h2>Step 2 — a ReaScript that pulls one file</h2>
+
+    <p>Save as <code>loophaven_fetch.lua</code> in your REAPER Scripts folder, then
+    run it from the Actions window. It downloads into a <code>Media</code>
+    subfolder beside the project and inserts the file at the edit cursor.</p>
+
+<pre><code>-- loophaven_fetch.lua — starting point, not a tested add-on
+-- Requires: the LoopHaven API running on 127.0.0.1:8000
+
+local API   = "http://127.0.0.1:8000"
+local ID    = "436799"          -- change, or prompt with reaper.GetUserInputs
+local KIND  = "loop"            -- "loop" or "acapella"
+local FORMAT = "mp3"            -- "mp3" = free preview, "wav" = needs a session
+
+local _, proj = reaper.EnumProjects(-1, "")
+local dir = proj ~= "" and proj:match("^(.*)[/\\]") or reaper.GetResourcePath()
+local media = dir .. "/Media"
+reaper.RecursiveCreateDirectory(media, 0)
+
+local url  = API .. "/api/download/audio/" .. KIND .. "/" .. ID
+local dest = media .. "/loophaven_" .. KIND .. "_" .. ID .. "." .. FORMAT
+
+-- -s -L -f: quiet, follow redirects, fail on HTTP error instead of saving a page
+local cmd = string.format(
+  'curl -s -L -f -o "%s" "%s"', dest:gsub('"', ''), url)
+
+local ok = reaper.ExecProcess(cmd, 60000)
+if not ok or ok ~= 0 then
+  reaper.ShowMessageBox(
+    "Fetch failed. Check that the API is running and that the session is open.",
+    "LoopHaven", 0)
+  return
+end
+
+reaper.InsertMedia(dest, 0)
+reaper.UpdateArrange()</code></pre>
+
+    <div class="note">
+      <p><strong>Read this before relying on it.</strong> This snippet is a
+      documented starting point, not a shipped feature — it has not been tested
+      across REAPER versions or platforms. <code>ExecProcess</code> needs
+      <code>curl</code> on <code>PATH</code>, which is not guaranteed on Windows
+      before build 1803. <code>-f</code> matters: without it, <code>curl</code>
+      happily saves an HTML quota page with a <code>.wav</code> extension and the
+      failure only appears later, in the arrange window.</p>
+    </div>
+
+    <h2>Step 3 — preview first, download second</h2>
+
+    <p>Point <code>FORMAT</code> at <code>mp3</code> while you are still choosing.
+    Previews cost nothing and need no account; a WAV costs quota and needs an open
+    session. Auditioning ten candidates as MP3 and downloading one as WAV is the
+    difference between a search and a harvest.</p>
+
+<pre><code># two searches, no files written at all
+haven search --genre "Boom Bap" --bpm 90 --key Am --limit 5
+haven search --genre Trap --bpm 140 --limit 5 --json</code></pre>
+
+    <h2>What this deliberately does not do</h2>
+
+    <ul>
+      <li><strong>It does not time-stretch or match tempo.</strong> A loop at
+      128 BPM dropped into a 140 BPM project plays at the wrong speed until you
+      set the item's playback rate or enable beat-based stretching. The API
+      reports <code>bpm</code> and <code>time_signature</code> so you can decide;
+      it does not silently conform anything.</li>
+      <li><strong>It does not place audio on a musical grid.</strong> Insertion
+      is at the edit cursor, on the selected track. Quantising a loop is an
+      arrangement decision, not a fetch.</li>
+      <li><strong>It does not batch-download a genre.</strong> See
+      <a href="../limits/">the two limits</a>: one of them belongs to your account
+      and the other belongs to Looperman, and neither is retried automatically.</li>
+      <li><strong>It does not work in Ableton, Logic or FL Studio either.</strong>
+      The same split applies — local endpoint, then whatever that DAW offers for
+      file import — but nothing here plugs into those hosts.</li>
+    </ul>
+
+    <h2>Other hosts in one sentence each</h2>
+
+    <table>
+      <thead><tr><th>Host</th><th>The practical route</th></tr></thead>
+      <tbody>
+        <tr><td>REAPER</td><td>ReaScript + <code>ExecProcess</code>, or drop the file in the project's Media folder</td></tr>
+        <tr><td>Ableton Live</td><td>Watch a folder, or drag from the browser — the API just writes the file</td></tr>
+        <tr><td>FL Studio</td><td>Same: export to a folder, import from the browser</td></tr>
+        <tr><td>Anything else</td><td>If it can read a file from disk, it can read what this fetches</td></tr>
+      </tbody>
+    </table>
+
+    <p>The value is not integration depth. It is that the file arrives with a
+    correct name, a correct extension, and a record of what it is — instead of a
+    <code>.wav</code> that is secretly a quota page.</p>
+
+    <p>Next: <a href="../mcp/">letting an agent do the searching</a>, or
+    <a href="../limits/">what happens when you hit the quota</a>.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>Unofficial project.</strong> LoopHaven is not affiliated with,
+    endorsed by, or supported by Looperman. It reads public pages and your own
+    session, at human pace. It does not redistribute audio and does not bypass
+    quotas.</p>
+    <p>Looperman is a trademark of its owner, used here only to identify the site
+    this tool reads.</p>
+    <p>Loops and acapellas remain the property of their creators.</p>
+    <p>Last updated 16 November 2026 · <a href="https://github.com/mohamed-amine-ben-mallessa/loop-haven/blob/main/LICENSE">MIT</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Does Looperman have an API? (2026) — LoopHaven</title>
+<meta name="description" content="No. Looperman publishes no public API and no developer keys. What it has is an advanced-search form served as HTML — which is what LoopHaven reads. Here is what that form returns, and the three traps that break naive wrappers.">
+<link rel="canonical" href="https://mohamed-amine-ben-mallessa.github.io/loop-haven/looperman-api/">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LoopHaven">
+<meta property="og:title" content="Does Looperman have an API?">
+<meta property="og:description" content="No public API, no keys, no documented endpoints. What exists instead, and the traps that break a naive wrapper.">
+<meta property="og:url" content="https://mohamed-amine-ben-mallessa.github.io/loop-haven/looperman-api/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/looperman-api/#article",
+      "headline": "Does Looperman have an API?",
+      "description": "Looperman has no public API. This documents what the site serves instead — its advanced-search form — and the three structural traps that break naive wrappers.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-16",
+      "dateModified": "2026-11-16",
+      "author": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author" },
+      "publisher": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author" },
+      "isPartOf": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website" },
+      "about": { "@type": "Thing", "name": "Looperman", "sameAs": "https://www.looperman.com" },
+      "mentions": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author",
+      "name": "LoopHaven contributors",
+      "url": "https://github.com/mohamed-amine-ben-mallessa"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website",
+      "url": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/",
+      "name": "LoopHaven"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software",
+      "name": "LoopHaven",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Windows, macOS, Linux",
+      "license": "https://opensource.org/licenses/MIT",
+      "codeRepository": "https://github.com/mohamed-amine-ben-mallessa/loop-haven",
+      "sameAs": ["https://github.com/mohamed-amine-ben-mallessa/loop-haven", "https://pypi.org/project/loophaven/"]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5" fill="currentColor" opacity=".12"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 12h2.2M17.8 12H20"/><path d="M8.1 7.4v9.2M12 4.6v14.8M15.9 8.6v6.8"/></g></svg>
+      LoopHaven
+    </a>
+    <nav class="site-nav">
+      <a href="../looperman-api/" aria-current="page">Looperman API</a>
+      <a href="../download-loops-python/">Python</a>
+      <a href="../mcp/">MCP</a>
+      <a href="../filters/">Filters</a>
+      <a href="../reaper/">REAPER</a>
+      <a href="../limits/">Limits</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <h1>Does Looperman have an API?</h1>
+
+    <div class="answer">
+      <p><strong>No.</strong> Looperman publishes no public API, no developer keys
+      and no documented endpoints. What it has is an advanced-search form served
+      as HTML, which any browser can read. LoopHaven reads that form — it is a
+      wrapper, not a client of something official. Anything sold as &ldquo;the
+      Looperman API&rdquo; is a scraper with a friendlier name.</p>
+    </div>
+
+    <p class="meta">Verified against the live site on 16 November 2026</p>
+
+    <p>This matters before anything else: there is no key to request, no rate-limit
+    header to read, no changelog to watch. A change to the site's markup is a
+    breaking change for every tool built on it, with no notice. That is the whole
+    reason the parsing notes in this project are public rather than hidden.</p>
+
+    <h2>What Looperman serves instead</h2>
+
+    <p>The advanced-search dialog is not rendered into the page. It is fetched:</p>
+
+<pre><code>POST https://www.looperman.com/ajax/ajax_adv_search_modal
+Content-Type: application/x-www-form-urlencoded
+X-Requested-With: XMLHttpRequest
+Referer: https://www.looperman.com/loops
+
+item_type=loops&amp;query_filter_params=&lt;base64&gt;&amp;csrftoken=&lt;32 chars&gt;</code></pre>
+
+    <p>Three details decide whether this works at all:</p>
+
+    <ul>
+      <li>Without <code>X-Requested-With: XMLHttpRequest</code> the endpoint returns
+      a page, not the JSON payload. Without a matching <code>Referer</code> it can
+      be refused outright.</li>
+      <li>The <code>csrftoken</code> is not in a <code>&lt;meta&gt;</code> tag. It is
+      assigned in an inline script, so it has to be scraped from a
+      <code>var</code>/<code>let</code>/<code>const</code> declaration.</li>
+      <li>The response is <code>{"title", "icon", "content"}</code>, and the
+      <strong>content</strong> field is where the whole filter vocabulary lives —
+      as HTML, not as a list.</li>
+    </ul>
+
+    <h2>What the form gives you that URLs do not</h2>
+
+    <p>Reading the form is what makes a wrapper correct rather than approximately
+    correct. Four things are only knowable from it:</p>
+
+    <table>
+      <thead><tr><th>Filter</th><th>Reality</th></tr></thead>
+      <tbody>
+        <tr><td>Genres</td><td>69 values, each with a numeric <code>gid</code></td></tr>
+        <tr><td>Categories</td><td>40 values, <code>cid</code></td></tr>
+        <tr><td>Keys</td><td>24 values, <code>mkey</code> — <strong>flats do not exist</strong></td></tr>
+        <tr><td>Tempo</td><td>A <strong>range</strong>: <code>ftempo</code> and <code>ttempo</code>. There is no <code>bpm=</code> parameter.</td></tr>
+      </tbody>
+    </table>
+
+    <p>The key encoding is the one that surprises people: the site writes accidentals
+    the way a programmer would, so <code>F#</code> is <code>fs</code> and
+    <code>F#m</code> is <code>fsm</code> — but there is no flat spelling at all.
+    <code>Bb</code> is stored as <code>am</code>, which is musically the same pitch
+    class. A wrapper that passes <code>bb</code> through gets an unfiltered page
+    rather than an error.</p>
+
+    <h2>Three traps that silently corrupt a wrapper</h2>
+
+    <p>None of these throws. Each one produces a plausible page with wrong data,
+    which is why they take a week to notice.</p>
+
+    <h3>1. Every result card shares the same parent element</h3>
+
+    <p>The listing cards all sit inside one <code>div.col-12</code>. The obvious
+    approach — find the container, then read fields inside it — returns the same
+    ancestor for all 25 items, so every field you read belongs to the first one.
+    The reliable segmentation is the per-item <code>[data-mp3]</code> marker, in
+    document order.</p>
+
+    <h3>2. The detail page contains other loops' download links</h3>
+
+    <p>A loop detail page holds 16 links to <code>/getfiles/</code> when you are
+    logged in — the loop itself, plus every recommended loop below it. Taking the
+    first one is not &ldquo;usually right&rdquo;; it depends on the order the
+    recommendations are rendered. Indexing by element identity rather than list
+    position fixes it.</p>
+
+    <h3>3. The result count only exists on page one</h3>
+
+    <p>&ldquo;Loops 1 - 25 of 5,000&rdquo; appears on page one and then disappears.
+    The number is capped at 5,000 even when there are more, and very small result
+    sets are phrased differently (&ldquo;Showing 4 … loops&rdquo;). Any scraper
+    that reports a total on page two is inventing it. LoopHaven reports the ceiling
+    on page one and <code>null</code> afterwards, instead of guessing:</p>
+
+    <table>
+      <thead><tr><th>Request</th><th><code>total</code></th><th><code>pagination.total_capped</code></th></tr></thead>
+      <tbody>
+        <tr><td>Page 1, 5,000+ matches</td><td><code>5000</code></td><td><code>true</code></td></tr>
+        <tr><td>Page 1, fewer matches</td><td>the real count</td><td><code>false</code></td></tr>
+        <tr><td>Page 2 and beyond</td><td><code>null</code></td><td><code>false</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2>What LoopHaven exposes instead</h2>
+
+    <p>A small HTTP surface over the same site, with the vocabulary resolved for
+    you:</p>
+
+    <table>
+      <thead><tr><th>Route</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /api/filters</code></td><td>The full vocabulary as JSON</td></tr>
+        <tr><td><code>GET /api/search</code></td><td>Loop search; accepts labels, ids or slugs</td></tr>
+        <tr><td><code>GET /api/acapellas/search</code></td><td>Acapella search plus licence wording</td></tr>
+        <tr><td><code>GET /api/loop/{id}</code></td><td>One loop, parsed from the page's JSON-LD</td></tr>
+        <tr><td><code>GET /api/download/info/{kind}/{id}</code></td><td>What a download would give you, without spending quota</td></tr>
+        <tr><td><code>GET /api/download/audio/{kind}/{id}</code></td><td>The file itself</td></tr>
+      </tbody>
+    </table>
+
+<pre><code>curl "http://127.0.0.1:8000/api/search?genre=Trap&amp;bpm=140&amp;limit=1"
+
+{
+  "success": true,
+  "count": 1,
+  "total": 5000,
+  "pagination": { "from": 1, "to": 25, "total": 5000, "total_capped": true },
+  "resolved": { "genre": { "id": 54, "label": "Trap" } },
+  "looperman_url": "https://www.looperman.com/loops?gid=54&amp;ftempo=140&amp;ttempo=140",
+  "info": "MP3 previews need no session. WAV requires a session (POST /api/auth/login)."
+}</code></pre>
+
+    <p>Unknown filter values return <code>422</code> with suggestions rather than an
+    empty result page — the difference between &ldquo;no loops match&rdquo; and
+    &ldquo;you spelled the genre wrong&rdquo;.</p>
+
+    <h2>Can I build on this without asking Looperman?</h2>
+
+    <p>The code is MIT. The audio is not: loops and acapellas belong to the people
+    who uploaded them and are offered under Looperman's own terms, which allow use
+    inside a derivative work but not redistribution as-is. Reading public pages at
+    human pace is what a browser does; bulk harvesting is a different act, and this
+    project does not do it.</p>
+
+    <div class="note">
+      <p><strong>Deeper detail.</strong> The endpoint, the CSRF extraction and the
+      full filter dump are written up as public notes:
+      <a href="https://gist.github.com/mohamed-amine-ben-mallessa/03c051d6184044f72298466ef1df0c9e">the hidden search form</a>,
+      <a href="https://gist.github.com/mohamed-amine-ben-mallessa/d80cf3eeea46178e0206dbfcfb98f6f6">the DOM traps</a>,
+      <a href="https://gist.github.com/mohamed-amine-ben-mallessa/44aba43ba111189bc5aa0b10ea71baea">checking a session honestly</a>.</p>
+    </div>
+
+    <p>Next: <a href="../download-loops-python/">downloading the actual file with Python</a>,
+    or the <a href="../filters/">filter reference</a>.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>Unofficial project.</strong> LoopHaven is not affiliated with,
+    endorsed by, or supported by Looperman. It reads public pages and your own
+    session, at human pace. It does not redistribute audio and does not bypass
+    quotas.</p>
+    <p>Looperman is a trademark of its owner, used here only to identify the site
+    this tool reads. Loops and acapellas remain the property of their creators.</p>
+    <p>Last updated 16 November 2026 · <a href="https://github.com/mohamed-amine-ben-mallessa/loop-haven/blob/main/LICENSE">MIT</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

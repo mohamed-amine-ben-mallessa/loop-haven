@@ -1,0 +1,72 @@
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the site is plain, static HTML
+        run: |
+          set -e
+          test -f site/index.html
+          test -f site/sitemap.xml
+          # No JavaScript is shipped on purpose: crawlers and AI readers get the
+          # full text in the initial response.
+          if grep -RIn --include='*.html' '<script src=' site/; then
+            echo "external scripts are not allowed on this site" >&2
+            exit 1
+          fi
+
+      - name: Validate every JSON-LD block parses
+        run: |
+          python - <<'PY'
+          import json, pathlib, re, sys
+          bad = 0
+          for path in sorted(pathlib.Path("site").rglob("*.html")):
+              html = path.read_text(encoding="utf-8")
+              for i, block in enumerate(
+                  re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S), 1
+              ):
+                  try:
+                      json.loads(block)
+                  except json.JSONDecodeError as exc:
+                      print(f"{path} block {i}: {exc}")
+                      bad += 1
+          if bad:
+              sys.exit(f"{bad} invalid JSON-LD block(s)")
+          print("JSON-LD OK")
+          PY
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

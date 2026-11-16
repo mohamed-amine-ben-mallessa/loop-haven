@@ -149,6 +149,12 @@ Full parameter reference: [docs/API.md](docs/API.md) ·
 Filter tables: [docs/FILTERS.md](docs/FILTERS.md) ·
 How the site's internals were mapped: [docs/REVERSE-ENGINEERING.md](docs/REVERSE-ENGINEERING.md).
 
+Documentation site (same content, one page per question):
+<https://mohamed-amine-ben-mallessa.github.io/loop-haven/> — including
+[the Looperman API question](https://mohamed-amine-ben-mallessa.github.io/loop-haven/looperman-api/),
+[the filter reference](https://mohamed-amine-ben-mallessa.github.io/loop-haven/filters/)
+and [the two download limits](https://mohamed-amine-ben-mallessa.github.io/loop-haven/limits/).
+
 ### MCP
 
 ```json
@@ -165,10 +171,6 @@ How the site's internals were mapped: [docs/REVERSE-ENGINEERING.md](docs/REVERSE
 Tools: `search_loops`, `search_acapellas`, `get_acapella_detail`,
 `get_preview_url`, `export_loop_zip`, `toggle_favorite`. The agent sees JSON,
 never HTML.
-
-There is also a ready-made skill in [`skills/loop-haven/SKILL.md`](skills/loop-haven/SKILL.md)
-that teaches an agent the etiquette: preview before download, respect the
-licence label, never bulk-scrape.
 
 There is also a ready-made skill in [`skills/loop-haven/SKILL.md`](skills/loop-haven/SKILL.md)
 that teaches an agent the etiquette: preview before download, respect the

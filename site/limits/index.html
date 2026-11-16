@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Looperman download limits and 429s — LoopHaven</title>
+<meta name="description" content="Two different limits answer with the same 429: a local 30-page-reads-per-minute budget you control, and Looperman's own per-item daily download quota. How to tell them apart, and why nothing is retried automatically.">
+<link rel="canonical" href="https://mohamed-amine-ben-mallessa.github.io/loop-haven/limits/">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LoopHaven">
+<meta property="og:title" content="Looperman download limits and 429s">
+<meta property="og:description" content="A local page-read budget and Looperman's daily download quota both return 429. Here is how to tell them apart.">
+<meta property="og:url" content="https://mohamed-amine-ben-mallessa.github.io/loop-haven/limits/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/limits/#article",
+      "headline": "Looperman download limits and 429s",
+      "description": "Two limits answer with 429: a local page-read budget set by LOOPHAVEN_RATE_LIMIT, and Looperman's per-item daily download quota. Neither is retried automatically.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-16",
+      "dateModified": "2026-11-16",
+      "author": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author" },
+      "isPartOf": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website" },
+      "about": { "@type": "Thing", "name": "Looperman download quota" },
+      "mentions": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author",
+      "name": "LoopHaven contributors",
+      "url": "https://github.com/mohamed-amine-ben-mallessa"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website",
+      "url": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/",
+      "name": "LoopHaven"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software",
+      "name": "LoopHaven",
+      "applicationCategory": "DeveloperApplication",
+      "license": "https://opensource.org/licenses/MIT",
+      "codeRepository": "https://github.com/mohamed-amine-ben-mallessa/loop-haven"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5" fill="currentColor" opacity=".12"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 12h2.2M17.8 12H20"/><path d="M8.1 7.4v9.2M12 4.6v14.8M15.9 8.6v6.8"/></g></svg>
+      LoopHaven
+    </a>
+    <nav class="site-nav">
+      <a href="../looperman-api/">Looperman API</a>
+      <a href="../download-loops-python/">Python</a>
+      <a href="../mcp/">MCP</a>
+      <a href="../filters/">Filters</a>
+      <a href="../reaper/">REAPER</a>
+      <a href="../limits/" aria-current="page">Limits</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <h1>Looperman download limits and 429s</h1>
+
+    <div class="answer">
+      <p><strong>Two different limits return the same <code>429</code>, and they
+      are not interchangeable.</strong> One is a local budget — 30 page reads per
+      60 seconds by default, set by <code>LOOPHAVEN_RATE_LIMIT</code> — that exists
+      to stop your own retry loop from getting your account throttled. The other is
+      Looperman's own download quota, which is per item and per day and cannot be
+      raised, shared or routed around. The <code>detail</code> field says which one
+      you hit.</p>
+    </div>
+
+    <p class="meta">LoopHaven 0.1.0 · defaults verified on 16 November 2026</p>
+
+    <h2>Telling them apart</h2>
+
+    <table>
+      <thead><tr><th></th><th>Local budget</th><th>Looperman quota</th></tr></thead>
+      <tbody>
+        <tr><td>Who sets it</td><td>this process</td><td>Looperman</td></tr>
+        <tr><td>Default</td><td>30 page reads / 60 s</td><td>per item, per day</td></tr>
+        <tr><td>Applies to</td><td>page fetches (search, detail)</td><td>downloads (<code>/getfiles/</code>)</td></tr>
+        <tr><td><code>detail</code> begins with</td><td><code>local rate limit reached</code></td><td>the upstream refusal</td></tr>
+        <tr><td>What clears it</td><td>waiting out the window; cached reads are free</td><td>waiting until tomorrow — nothing else</td></tr>
+        <tr><td>Can you raise it</td><td>yes, <code>LOOPHAVEN_RATE_LIMIT</code></td><td>no</td></tr>
+      </tbody>
+    </table>
+
+    <p>The local counter is visible before you hit it, on the health route:</p>
+
+<pre><code>curl "http://127.0.0.1:8000/api/health"
+
+{
+  "status": "ok",
+  "auth": { "logged_in": true, "username": "Benmallessa" },
+  "rate_limit": {
+    "max_requests": 30, "window_seconds": 60,
+    "recent_requests": 3, "remaining": 27
+  }
+}</code></pre>
+
+    <h2>Why a local limiter at all</h2>
+
+    <p>Because the natural way to write a scraper is a loop, and the natural
+    failure of a loop is that it stops looking like a person. Thirty page reads a
+    minute is well above browsing speed and well below anything that looks like
+    harvesting. Cached reads do not count, so paging back through results you
+    already fetched costs nothing.</p>
+
+<pre><code># slower, for a shared connection or a large batch
+LOOPHAVEN_RATE_LIMIT=10</code></pre>
+
+    <p>A malformed value does not crash the process: it falls back to 30. That is
+    deliberate — an environment variable should not be able to prevent the module
+    from importing.</p>
+
+    <h2>What a quota refusal actually looks like</h2>
+
+    <p>Looperman does not always answer a spent quota with a status code. Often it
+    answers <code>200</code> with an HTML page, which is the reason a download
+    route validates what came back before writing anything:</p>
+
+    <table>
+      <thead><tr><th>Response</th><th>Meaning</th><th>What LoopHaven does</th></tr></thead>
+      <tbody>
+        <tr><td><code>audio/wav</code>, <code>audio/mpeg</code></td><td>the file</td><td>streams it, keeps the real filename</td></tr>
+        <tr><td><code>text/html</code></td><td>a quota page or a login page</td><td><code>502</code>; writes nothing</td></tr>
+        <tr><td><code>429</code></td><td>daily limit reached</td><td><code>429</code>, passed through</td></tr>
+        <tr><td><code>401</code></td><td>no session open</td><td><code>401</code>, before touching the site</td></tr>
+      </tbody>
+    </table>
+
+    <p>For loops the check goes further: the payload has to start with
+    <code>RIFF…WAVE</code> before it is called a WAV. That looks paranoid until you
+    have saved a quota page as a five-second <code>.wav</code> and only noticed
+    inside a DAW, days later, with no record of which fetch produced it.</p>
+
+    <h2>Nothing is retried automatically</h2>
+
+    <p>This is the deliberate part. A retry on <code>429</code> is
+    indistinguishable from insisting, and the thing being protected is not the
+    software's uptime — it is your account. So:</p>
+
+    <ul>
+      <li><strong>No backoff-and-retry loop.</strong> A <code>429</code> stops and
+      reports. Waiting is a decision made by whoever is running the thing.</li>
+      <li><strong>No proxy rotation, no second account.</strong> One person, one
+      account, one quota.</li>
+      <li><strong>No silent format substitution.</strong> An acapella is an MP3
+      whatever you ask for; a failed file inside a ZIP becomes
+      <code>ERROR_&lt;id&gt;.txt</code> with the reason, not a renamed
+      neighbour.</li>
+    </ul>
+
+    <div class="note">
+      <p><strong>If you need more than the quota allows,</strong> the answer is a
+      different source — a paid sample library, a Creative Commons collection, your
+      own recordings. A tool that works around the limit is a tool that gets the
+      limit tightened for everyone, including you.</p>
+    </div>
+
+    <h2>A session that lies is worse than no session</h2>
+
+    <p>Most &ldquo;download broken&rdquo; reports are a stale cookie. Cached state
+    would say <code>logged_in: true</code> forever, so the check is re-verified
+    against <code>/account/</code> on every status call:</p>
+
+<pre><code>curl "http://127.0.0.1:8000/api/auth/status"
+{ "logged_in": false, "username": null, "user_id": null }</code></pre>
+
+    <p>The same fact shows up on a detail page as
+    <code>"download_link_present": false</code> — the page has no
+    <code>/getfiles</code> link for that item. Sixteen links appear when you are
+    logged in; zero when you are not. That difference, not a parse error, is what
+    to check first.</p>
+
+    <p>Next: <a href="../download-loops-python/">the download flow in Python</a>,
+    or <a href="../filters/">narrow the search</a> so you spend less quota finding
+    the right file.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>Unofficial project.</strong> LoopHaven is not affiliated with,
+    endorsed by, or supported by Looperman. It reads public pages and your own
+    session, at human pace. It does not redistribute audio and does not bypass
+    quotas.</p>
+    <p>Looperman is a trademark of its owner, used here only to identify the site
+    this tool reads.</p>
+    <p>Loops and acapellas remain the property of their creators.</p>
+    <p>Last updated 16 November 2026 · <a href="https://github.com/mohamed-amine-ben-mallessa/loop-haven/blob/main/LICENSE">MIT</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Looperman search filters: genres, categories, keys — LoopHaven</title>
+<meta name="description" content="The complete Looperman filter reference: 69 genres, 40 categories, 24 keys, 4 time signatures and 10 sort orders, read from the site's own form. Tempo is a range, and flats are stored as sharps.">
+<link rel="canonical" href="https://mohamed-amine-ben-mallessa.github.io/loop-haven/filters/">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LoopHaven">
+<meta property="og:title" content="Looperman search filters: the complete reference">
+<meta property="og:description" content="69 genres, 40 categories, 24 keys. Tempo is a range, not a value. Flats do not exist upstream.">
+<meta property="og:url" content="https://mohamed-amine-ben-mallessa.github.io/loop-haven/filters/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/filters/#article",
+      "headline": "Looperman search filters: the complete reference",
+      "description": "Every Looperman search filter value and its upstream id: 69 genres, 40 categories, 24 keys, 4 time signatures, 10 sort orders, plus the acapella-only filters.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-16",
+      "dateModified": "2026-11-16",
+      "author": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author" },
+      "isPartOf": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website" },
+      "about": { "@type": "Thing", "name": "Looperman advanced search" },
+      "mentions": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author",
+      "name": "LoopHaven contributors",
+      "url": "https://github.com/mohamed-amine-ben-mallessa"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website",
+      "url": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/",
+      "name": "LoopHaven"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software",
+      "name": "LoopHaven",
+      "applicationCategory": "DeveloperApplication",
+      "license": "https://opensource.org/licenses/MIT",
+      "codeRepository": "https://github.com/mohamed-amine-ben-mallessa/loop-haven"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5" fill="currentColor" opacity=".12"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 12h2.2M17.8 12H20"/><path d="M8.1 7.4v9.2M12 4.6v14.8M15.9 8.6v6.8"/></g></svg>
+      LoopHaven
+    </a>
+    <nav class="site-nav">
+      <a href="../looperman-api/">Looperman API</a>
+      <a href="../download-loops-python/">Python</a>
+      <a href="../mcp/">MCP</a>
+      <a href="../filters/" aria-current="page">Filters</a>
+      <a href="../reaper/">REAPER</a>
+      <a href="../limits/">Limits</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <h1>Looperman search filters: the complete reference</h1>
+
+    <div class="answer">
+      <p><strong>Looperman's advanced search exposes 69 genres, 40 categories, 24
+      keys, 4 time signatures and 10 sort orders.</strong> Every value below was
+      read from the site's own form, not guessed from a URL. Two of them surprise
+      people: tempo is a <em>range</em> (<code>ftempo</code> and
+      <code>ttempo</code>), and flats are not stored at all — <code>Bb</code> is
+      written <code>am</code>.</p>
+    </div>
+
+    <p class="meta">Dumped from <code>POST /ajax/ajax_adv_search_modal</code> on 16 November 2026</p>
+
+    <h2>The counts</h2>
+
+    <table>
+      <thead><tr><th>Vocabulary</th><th>Upstream param</th><th>Values</th></tr></thead>
+      <tbody>
+        <tr><td>Genres</td><td><code>gid</code></td><td>69</td></tr>
+        <tr><td>Categories</td><td><code>cid</code></td><td>40</td></tr>
+        <tr><td>Keys</td><td><code>mkey</code></td><td>24</td></tr>
+        <tr><td>Time signatures</td><td><code>tsig</code></td><td>4</td></tr>
+        <tr><td>Sort orders</td><td><code>order</code></td><td>10</td></tr>
+        <tr><td>Date windows</td><td><code>when</code></td><td>5</td></tr>
+        <tr><td>Results per page</td><td><code>ppage</code></td><td>3 (25 / 50 / 100)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Tempo is a range, not a value</h2>
+
+    <p>There is no <code>bpm=</code> parameter upstream. A tempo is expressed as a
+    lower and an upper bound, and an exact tempo is simply the same number twice:
+    <code>ftempo=140&amp;ttempo=140</code>. LoopHaven accepts
+    <code>bpm=140</code> as a shortcut; <code>ftempo=90&amp;ttempo=110</code>
+    searches the band between them.</p>
+
+    <h2>Keys: there are no flats</h2>
+
+    <p>Sharps are written with an <code>s</code>, and a minor key appends
+    <code>m</code>: <code>fs</code> is F#, <code>fsm</code> is F#m. Flat spellings
+    do not exist, because the pitch classes are stored as sharps — which is why
+    <code>Bb</code> appears as <code>am</code> and <code>Eb</code> as
+    <code>dsm</code>.</p>
+
+    <table>
+      <thead><tr><th>Key</th><th><code>mkey</code></th><th>Key</th><th><code>mkey</code></th><th>Key</th><th><code>mkey</code></th><th>Key</th><th><code>mkey</code></th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td><code>a</code></td><td>Am</td><td><code>am</code></td><td>A#</td><td><code>as</code></td><td>A#m</td><td><code>asm</code></td></tr>
+        <tr><td>B</td><td><code>b</code></td><td>Bm</td><td><code>bm</code></td><td>C</td><td><code>c</code></td><td>Cm</td><td><code>cm</code></td></tr>
+        <tr><td>C#</td><td><code>cs</code></td><td>C#m</td><td><code>csm</code></td><td>D</td><td><code>d</code></td><td>Dm</td><td><code>dm</code></td></tr>
+        <tr><td>D#</td><td><code>ds</code></td><td>D#m</td><td><code>dsm</code></td><td>E</td><td><code>e</code></td><td>Em</td><td><code>em</code></td></tr>
+        <tr><td>F</td><td><code>f</code></td><td>Fm</td><td><code>fm</code></td><td>F#</td><td><code>fs</code></td><td>F#m</td><td><code>fsm</code></td></tr>
+        <tr><td>G</td><td><code>g</code></td><td>Gm</td><td><code>gm</code></td><td>G#</td><td><code>gs</code></td><td>G#m</td><td><code>gsm</code></td></tr>
+      </tbody>
+    </table>
+
+    <p>A wrapper that forwards <code>bb</code> unchanged does not get an error. It
+    gets an unfiltered page, which looks like a working search until someone
+    notices the keys are all wrong. Sending <code>Bb</code> to LoopHaven is safe:
+    it translates before the request.</p>
+
+    <h2>Time signatures</h2>
+
+    <table>
+      <thead><tr><th>Value</th><th><code>tsig</code></th></tr></thead>
+      <tbody>
+        <tr><td>4/4</td><td><code>4x4</code></td></tr>
+        <tr><td>2/4</td><td><code>2x4</code></td></tr>
+        <tr><td>3/4</td><td><code>3x4</code></td></tr>
+        <tr><td>6/8</td><td><code>6x8</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Date window</h2>
+
+    <table>
+      <thead><tr><th>Label</th><th><code>when</code></th></tr></thead>
+      <tbody>
+        <tr><td>Last 24 hours</td><td><code>1</code></td></tr>
+        <tr><td>Last 48 hours</td><td><code>5</code></td></tr>
+        <tr><td>Last 7 days</td><td><code>2</code></td></tr>
+        <tr><td>Last 30 days</td><td><code>3</code></td></tr>
+        <tr><td>Last 60 days</td><td><code>4</code></td></tr>
+      </tbody>
+    </table>
+
+    <p>Note the order: <code>5</code> is 48 hours, not <code>4</code>. The numeric
+    ids are not sequential in time, which is the kind of detail that only shows up
+    when the form is read rather than inferred.</p>
+
+    <h2>Sort orders</h2>
+
+    <table>
+      <thead><tr><th><code>order</code></th><th>Sorts by</th><th><code>order</code></th><th>Sorts by</th></tr></thead>
+      <tbody>
+        <tr><td><code>date</code></td><td>Upload date</td><td><code>name</code></td><td>Title</td></tr>
+        <tr><td><code>author</code></td><td>Uploader</td><td><code>genre</code></td><td>Genre</td></tr>
+        <tr><td><code>tempo</code></td><td>BPM</td><td><code>fsize</code></td><td>File size</td></tr>
+        <tr><td><code>duration</code></td><td>Length</td><td><code>downloads</code></td><td>Download count</td></tr>
+        <tr><td><code>favs</code></td><td>Favourites</td><td><code>comments</code></td><td>Comment count</td></tr>
+      </tbody>
+    </table>
+
+    <p>Direction is <code>d</code> (descending) or <code>a</code> (ascending).
+    Results per page is 25, 50 or 100.</p>
+
+    <h2>Genres — 69 values, with their <code>gid</code></h2>
+
+    <table>
+      <thead><tr><th>Genre</th><th><code>gid</code></th><th>Genre</th><th><code>gid</code></th><th>Genre</th><th><code>gid</code></th></tr></thead>
+      <tbody>
+        <tr><td>8Bit Chiptune</td><td>56</td><td>Acid</td><td>52</td><td>Acoustic</td><td>3</td></tr>
+        <tr><td>Afrobeat</td><td>67</td><td>Ambient</td><td>2</td><td>Big Room</td><td>66</td></tr>
+        <tr><td>Blues</td><td>33</td><td>Boom Bap</td><td>65</td><td>Breakbeat</td><td>37</td></tr>
+        <tr><td>Chill Out</td><td>21</td><td>Cinematic</td><td>36</td><td>Classical</td><td>13</td></tr>
+        <tr><td>Comedy</td><td>51</td><td>Country</td><td>44</td><td>Crunk</td><td>39</td></tr>
+        <tr><td>Dance</td><td>17</td><td>Dancehall</td><td>55</td><td>Deep House</td><td>30</td></tr>
+        <tr><td>Dirty</td><td>23</td><td>Disco</td><td>18</td><td>Drum And Bass</td><td>11</td></tr>
+        <tr><td>Dub</td><td>5</td><td>Dubstep</td><td>49</td><td>EDM</td><td>64</td></tr>
+        <tr><td>Electro</td><td>42</td><td>Electronic</td><td>16</td><td>Ethnic</td><td>15</td></tr>
+        <tr><td>Folk</td><td>25</td><td>Funk</td><td>19</td><td>Fusion</td><td>46</td></tr>
+        <tr><td>Garage</td><td>24</td><td>Glitch</td><td>31</td><td>Grime</td><td>43</td></tr>
+        <tr><td>Grunge</td><td>53</td><td>Hardcore</td><td>48</td><td>Hardstyle</td><td>61</td></tr>
+        <tr><td>Heavy Metal</td><td>27</td><td>Hip Hop</td><td>7</td><td>House</td><td>22</td></tr>
+        <tr><td>Indie</td><td>63</td><td>Industrial</td><td>38</td><td>Jazz</td><td>6</td></tr>
+        <tr><td>Jungle</td><td>10</td><td>Latin</td><td>69</td><td>Lo-Fi</td><td>62</td></tr>
+        <tr><td>Math Rock</td><td>72</td><td>Moombahton</td><td>57</td><td>Orchestral</td><td>34</td></tr>
+        <tr><td>Phonk</td><td>70</td><td>Pop</td><td>50</td><td>Psychedelic</td><td>60</td></tr>
+        <tr><td>Punk</td><td>14</td><td>Rap</td><td>8</td><td>Reggae</td><td>4</td></tr>
+        <tr><td>Reggaeton</td><td>32</td><td>Religious</td><td>45</td><td>RnB</td><td>12</td></tr>
+        <tr><td>Rock</td><td>1</td><td>Samba</td><td>29</td><td>Ska</td><td>41</td></tr>
+        <tr><td>Soul</td><td>59</td><td>Spoken Word</td><td>47</td><td>Techno</td><td>9</td></tr>
+        <tr><td>Trance</td><td>28</td><td>Trap</td><td>54</td><td>Trip Hop</td><td>58</td></tr>
+        <tr><td>UK Drill</td><td>68</td><td>Vaporwave</td><td>71</td><td>Weird</td><td>35</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Categories — 40 values, with their <code>cid</code></h2>
+
+    <table>
+      <thead><tr><th>Category</th><th><code>cid</code></th><th>Category</th><th><code>cid</code></th><th>Category</th><th><code>cid</code></th></tr></thead>
+      <tbody>
+        <tr><td>Accordion</td><td>40</td><td>Arpeggio</td><td>47</td><td>Bagpipe</td><td>35</td></tr>
+        <tr><td>Banjo</td><td>36</td><td>Bass</td><td>2</td><td>Bass Guitar</td><td>43</td></tr>
+        <tr><td>Bass Synth</td><td>44</td><td>Bass Wobble</td><td>39</td><td>Beatbox</td><td>31</td></tr>
+        <tr><td>Bells</td><td>42</td><td>Brass</td><td>23</td><td>Choir</td><td>34</td></tr>
+        <tr><td>Clarinet</td><td>37</td><td>Didgeridoo</td><td>28</td><td>Drum</td><td>1</td></tr>
+        <tr><td>Flute</td><td>7</td><td>Fx</td><td>5</td><td>Groove</td><td>24</td></tr>
+        <tr><td>Guitar Acoustic</td><td>33</td><td>Guitar Electric</td><td>3</td><td>Harmonica</td><td>25</td></tr>
+        <tr><td>Harp</td><td>41</td><td>Harpsichord</td><td>30</td><td>Mandolin</td><td>32</td></tr>
+        <tr><td>Orchestral</td><td>22</td><td>Organ</td><td>26</td><td>Pad</td><td>11</td></tr>
+        <tr><td>Percussion</td><td>20</td><td>Piano</td><td>21</td><td>Rhodes Piano</td><td>46</td></tr>
+        <tr><td>Scratch</td><td>12</td><td>Sitar</td><td>9</td><td>Soundscapes</td><td>45</td></tr>
+        <tr><td>Strings</td><td>10</td><td>Synth</td><td>4</td><td>Tabla</td><td>8</td></tr>
+        <tr><td>Ukulele</td><td>38</td><td>Violin</td><td>29</td><td>Vocal</td><td>6</td></tr>
+        <tr><td>Woodwind</td><td>27</td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Acapellas have their own filters</h2>
+
+    <p>Acapella search accepts a different set. Passing a loops-only filter such as
+    <code>category</code> to it is a mistake worth catching early: the site ignores
+    <code>cid=</code> on that listing and still returns results, so the filter looks
+    like it works. LoopHaven rejects it with <code>422</code>.</p>
+
+    <table>
+      <thead><tr><th>Filter</th><th>Values</th></tr></thead>
+      <tbody>
+        <tr><td><code>rights</code> / <code>ur</code></td><td><code>1</code> free commercial &amp; non-commercial · <code>2</code> non-commercial only, commercial licence required</td></tr>
+        <tr><td><code>mf</code> — vocal gender</td><td><code>1</code> male · <code>2</code> female · <code>3</code> both</td></tr>
+        <tr><td><code>style</code></td><td><code>1</code> rap · <code>2</code> singing · <code>3</code> rap &amp; singing</td></tr>
+        <tr><td><code>vocal_type</code> / <code>type</code></td><td><code>1</code> hook · <code>2</code> verse · <code>3</code> full song</td></tr>
+        <tr><td><code>autotune</code></td><td><code>1</code> none · <code>2</code> used</td></tr>
+        <tr><td><code>adult</code></td><td><code>y</code> keep · <code>n</code> remove</td></tr>
+        <tr><td><code>mydl</code></td><td>only acapellas you already downloaded (needs a session)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>The one filter that does nothing</h2>
+
+    <p>Loop cards display the DAW a loop was made in, and the site has a
+    <code>did</code> parameter for it, so it looks filterable. It is not: searching
+    with <code>did</code> returns results that ignore it. Nothing in the page
+    signals this, which is why it reads as a broken parser for a week before anyone
+    checks the form.</p>
+
+    <h2>Using them</h2>
+
+    <p>Labels, numeric ids and slugs are all accepted, and the response echoes what
+    was resolved:</p>
+
+<pre><code>curl "http://127.0.0.1:8000/api/search?genre=Phonk&amp;category=Drum&amp;key=F%23m&amp;ftempo=140&amp;ttempo=145&amp;when=2&amp;order=downloads&amp;dir=d"
+
+{
+  "resolved": {
+    "genre": { "id": 70, "label": "Phonk" },
+    "category": { "id": 1, "label": "Drum" },
+    "key": { "id": "fsm", "label": "F#m" }
+  }
+}</code></pre>
+
+    <p>An unknown value returns <code>422</code> with suggestions, rather than an
+    empty page that is indistinguishable from &ldquo;nothing matches&rdquo;.</p>
+
+    <p>Next: <a href="../download-loops-python/">the download flow</a>, or
+    <a href="../limits/">the two limits you will hit</a>.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>Unofficial project.</strong> LoopHaven is not affiliated with,
+    endorsed by, or supported by Looperman. It reads public pages and your own
+    session, at human pace. It does not redistribute audio and does not bypass
+    quotas.</p>
+    <p>Looperman is a trademark of its owner, used here only to identify the site
+    this tool reads. Loops and acapellas remain the property of their creators.</p>
+    <p>Last updated 16 November 2026 · <a href="https://github.com/mohamed-amine-ben-mallessa/loop-haven/blob/main/LICENSE">MIT</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

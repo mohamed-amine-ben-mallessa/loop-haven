@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to download Looperman loops with Python — LoopHaven</title>
+<meta name="description" content="The MP3 preview is public; the WAV needs a logged-in session and counts against a quota. Working code, the anonymous-zero-download-links trap, and the headers to check before you save a file.">
+<link rel="canonical" href="https://mohamed-amine-ben-mallessa.github.io/loop-haven/download-loops-python/">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LoopHaven">
+<meta property="og:title" content="How to download Looperman loops with Python">
+<meta property="og:description" content="Preview versus WAV, why an anonymous request gets no download link, and the code that works.">
+<meta property="og:url" content="https://mohamed-amine-ben-mallessa.github.io/loop-haven/download-loops-python/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/download-loops-python/#article",
+      "headline": "How to download Looperman loops with Python",
+      "description": "Downloading a Looperman loop requires a logged-in session: the MP3 preview is public, the WAV is served only to a session and is quota-limited. Working code and the failure modes.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-16",
+      "dateModified": "2026-11-16",
+      "author": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author" },
+      "isPartOf": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website" },
+      "about": { "@type": "Thing", "name": "Looperman" },
+      "mentions": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author",
+      "name": "LoopHaven contributors",
+      "url": "https://github.com/mohamed-amine-ben-mallessa"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website",
+      "url": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/",
+      "name": "LoopHaven"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software",
+      "name": "LoopHaven",
+      "applicationCategory": "DeveloperApplication",
+      "license": "https://opensource.org/licenses/MIT",
+      "codeRepository": "https://github.com/mohamed-amine-ben-mallessa/loop-haven"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5" fill="currentColor" opacity=".12"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 12h2.2M17.8 12H20"/><path d="M8.1 7.4v9.2M12 4.6v14.8M15.9 8.6v6.8"/></g></svg>
+      LoopHaven
+    </a>
+    <nav class="site-nav">
+      <a href="../looperman-api/">Looperman API</a>
+      <a href="../download-loops-python/" aria-current="page">Python</a>
+      <a href="../mcp/">MCP</a>
+      <a href="../filters/">Filters</a>
+      <a href="../reaper/">REAPER</a>
+      <a href="../limits/">Limits</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <h1>How to download Looperman loops with Python</h1>
+
+    <div class="answer">
+      <p><strong>You need an account and a logged-in session.</strong> The MP3
+      preview on a listing page is public; the WAV comes from a
+      <code>/getfiles/</code> link that only exists for a logged-in visitor, and
+      every download counts against a per-account quota. LoopHaven opens that
+      session on your own machine and streams the resulting file.</p>
+    </div>
+
+    <p class="meta">Verified against the live site on 16 November 2026 · LoopHaven 0.1.0</p>
+
+    <h2>There are two different files, and only one is free</h2>
+
+    <table>
+      <thead><tr><th></th><th>Preview</th><th>Download</th></tr></thead>
+      <tbody>
+        <tr><td>Format</td><td>MP3</td><td>WAV for loops, MP3 for acapellas</td></tr>
+        <tr><td>Needs a session</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Counts against quota</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Where it comes from</td><td><code>data-mp3</code> on the card</td><td><code>/getfiles/</code> on the detail page</td></tr>
+        <tr><td>LoopHaven route</td><td><code>/api/stream/preview</code></td><td><code>/api/download/audio/…</code></td></tr>
+      </tbody>
+    </table>
+
+    <p>The preview is enough to audition material and decide. The WAV is what you
+    actually load into a DAW, and it is the part that has rules attached.</p>
+
+    <h2>The symptom that wastes a day: zero download links</h2>
+
+    <p>A loop's detail page contains <strong>16</strong> links to
+    <code>/getfiles/</code> when you are logged in — the loop itself plus every
+    recommended loop rendered below it. Fetched without a session, the same page
+    contains <strong>zero</strong>.</p>
+
+    <p>So when a scraper reports &ldquo;no download link on the page&rdquo;, the
+    cause is almost never a markup change or a quota. It is an expired cookie. The
+    three symptoms — health check says logged in, download button appears, download
+    fails — are one wrong predicate. <a href="../limits/">Checking a session
+    properly</a> is worth reading before you debug anything else.</p>
+
+    <h2>Working flow</h2>
+
+<pre><code>pip install "loophaven[mcp]"
+python -m uvicorn loophaven.api.app:app --host 127.0.0.1 --port 8000
+
+# open a session (prompts locally; the password is never stored)
+haven login
+
+# what a download would give you — free, spends no quota
+curl "http://127.0.0.1:8000/api/download/info/loop/436799"</code></pre>
+
+    <p>The <code>info</code> route exists so you can decide before spending
+    anything:</p>
+
+<pre><code>{
+  "id": "436799", "kind": "loop",
+  "logged_in": true, "requires_login": true, "download_available": true,
+  "expected_format": "wav", "duration_seconds": 13,
+  "title": "Lil Uzi Vert arp type loop", "author": "NiemiroMTS",
+  "bpm": 140, "key": "Cm", "size_hint": "2.31 MB",
+  "license": "https://www.looperman.com/help/terms"
+}</code></pre>
+
+    <h3>Search, then fetch, in Python</h3>
+
+<pre><code>import pathlib, re, requests
+
+BASE = "http://127.0.0.1:8000"
+
+found = requests.get(f"{BASE}/api/search", params={
+    "genre": "Trap", "bpm": 140, "key": "Cm", "limit": 3,
+}, timeout=30).json()
+
+for item in found["loops"]:
+    print(item["id"], item["bpm"], item["key"], item["title"])
+
+loop_id = found["loops"][0]["id"]
+
+info = requests.get(f"{BASE}/api/download/info/loop/{loop_id}", timeout=30).json()
+if not info["download_available"]:
+    raise SystemExit(f"not available (logged_in={info['logged_in']})")
+
+audio = requests.get(f"{BASE}/api/download/audio/loop/{loop_id}", timeout=120)
+audio.raise_for_status()
+
+stem = re.sub(r"[^A-Za-z0-9 ._-]+", "_", info["title"]).strip()
+out = pathlib.Path("loops")
+out.mkdir(exist_ok=True)
+path = out / f"{stem}.{info['expected_format']}"
+path.write_bytes(audio.content)
+print(info["size_hint"], "->", path)</code></pre>
+
+    <h3>Check the headers before you trust the file</h3>
+
+    <p>A download that silently succeeds is the failure mode worth guarding
+    against: a quota page or a login page returned with <code>200</code> would
+    otherwise be saved as <code>.wav</code> and break later, in the DAW, with no
+    trace of where it came from.</p>
+
+<pre><code>HTTP 200
+Content-Type: audio/wav
+X-Audio-Format: wav
+Content-Disposition: attachment; filename="looperman-l-8513679-0436799-....wav"</code></pre>
+
+    <ul>
+      <li><code>Content-Type</code> is the real type, not a guess from the URL.</li>
+      <li><code>X-Audio-Format</code> is <code>wav</code> for loops and
+      <code>mp3</code> for acapellas — acapellas have no WAV, whatever you ask
+      for.</li>
+      <li><code>429</code> is Looperman&#39;s quota, passed through unchanged.</li>
+      <li><code>502</code> means the upstream answered with HTML instead of audio.
+      Nothing is written to disk.</li>
+      <li><code>401</code> means no session is open.</li>
+    </ul>
+
+    <h2>Several loops at once</h2>
+
+    <p><code>POST /api/download/zip</code> builds a personal pack of 2–4 loops,
+    with a <code>README.txt</code> recalling the licence situation. Any file that
+    fails is written into the ZIP as <code>ERROR_&lt;id&gt;.txt</code> with the
+    reason, rather than silently substituted with a different format.</p>
+
+<pre><code>curl -X POST "http://127.0.0.1:8000/api/download/zip" \
+  -H "Content-Type: application/json" \
+  -d '{"ids": ["434657", "434373"], "format": "wav", "filename": "pack.zip"}' \
+  -o pack.zip</code></pre>
+
+    <p>Four loops is the practical ceiling because the quota is per account. This
+    is a sampling tool, not a mirroring tool.</p>
+
+    <h2>What you may do with the file</h2>
+
+    <p>The code is MIT; the audio is not. Loops belong to the people who uploaded
+    them and are offered under Looperman's terms, which allow use inside a
+    derivative work but not redistribution as-is. The licence field returned by the
+    API is a quotation of what the page says, not legal advice.</p>
+
+    <p>Next: <a href="../limits/">what a 429 means</a>, or the
+    <a href="../filters/">filter reference</a> to narrow a search before you
+    download anything.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>Unofficial project.</strong> LoopHaven is not affiliated with,
+    endorsed by, or supported by Looperman. It reads public pages and your own
+    session, at human pace. It does not redistribute audio and does not bypass
+    quotas.</p>
+    <p>Looperman is a trademark of its owner, used here only to identify the site
+    this tool reads. Loops and acapellas remain the property of their creators.</p>
+    <p>Last updated 16 November 2026 · <a href="https://github.com/mohamed-amine-ben-mallessa/loop-haven/blob/main/LICENSE">MIT</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

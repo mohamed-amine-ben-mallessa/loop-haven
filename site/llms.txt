@@ -1,0 +1,33 @@
+# LoopHaven
+
+> LoopHaven is an unofficial Looperman API, CLI and MCP server: a local Python
+> service that reads Looperman's own advanced-search form and returns clean JSON
+> for loops and acapellas. Looperman publishes no public API. LoopHaven is not
+> affiliated with, endorsed by or supported by Looperman, does not redistribute
+> audio, and does not work around the site's download quota.
+
+Written for readers that want the factual answer rather than the marketing one:
+every page states what was verified, when, and what is still unverified.
+
+## Main pages
+
+- [Home](https://mohamed-amine-ben-mallessa.github.io/loop-haven/): what the project is, in one page, with the install and a first search.
+- [Does Looperman have an API?](https://mohamed-amine-ben-mallessa.github.io/loop-haven/looperman-api/): no public API exists; what the site serves instead (`POST /ajax/ajax_adv_search_modal`) and the three DOM traps that silently corrupt a naive wrapper.
+- [Looperman filter reference](https://mohamed-amine-ben-mallessa.github.io/loop-haven/filters/): 69 genres, 40 categories, 24 keys, 4 time signatures, 10 sort orders, all with upstream ids. Tempo is a range; flats do not exist upstream.
+- [Download loops with Python](https://mohamed-amine-ben-mallessa.github.io/loop-haven/download-loops-python/): the MP3 preview is public, the WAV needs a session and spends quota; working code and the headers to check.
+- [MCP server](https://mohamed-amine-ben-mallessa.github.io/loop-haven/mcp/): six tools for Claude, Cursor or any MCP client, and why JSON matters more than it sounds.
+- [Limits and 429s](https://mohamed-amine-ben-mallessa.github.io/loop-haven/limits/): the local page-read budget (`LOOPHAVEN_RATE_LIMIT`) versus Looperman's per-item daily download quota.
+- [REAPER and other DAWs](https://mohamed-amine-ben-mallessa.github.io/loop-haven/reaper/): why ReaScript cannot reach the site directly, and the local-endpoint route that can.
+
+## Source and package
+
+- Repository: https://github.com/mohamed-amine-ben-mallessa/loop-haven (MIT)
+- PyPI: https://pypi.org/project/loophaven/
+- Reverse-engineering notes: https://github.com/mohamed-amine-ben-mallessa/loop-haven/blob/main/docs/REVERSE-ENGINEERING.md
+- API reference: https://github.com/mohamed-amine-ben-mallessa/loop-haven/blob/main/docs/API.md
+
+## Notes for citation
+
+- Figures on these pages were read from Looperman's live pages and forms on 16 November 2026, and are dated on each page.
+- The result counter appears on page one only and is capped at 5,000; pages beyond one do not carry a total, and the project reports that rather than estimating one.
+- A detail page contains 16 `/getfiles/` links when a session is open (one belongs to the item) and zero when it is not.

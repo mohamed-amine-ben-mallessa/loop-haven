@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LoopHaven — an unofficial Looperman API, CLI and MCP server</title>
+<meta name="description" content="Looperman has no public API. LoopHaven is a local HTTP API, a command-line tool and an MCP server that read the site's own search filters and return clean JSON. MIT, Python 3.10+.">
+<link rel="canonical" href="https://mohamed-amine-ben-mallessa.github.io/loop-haven/">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="LoopHaven">
+<meta property="og:title" content="LoopHaven — an unofficial Looperman API, CLI and MCP server">
+<meta property="og:description" content="Search Looperman loops and acapella previews with the site's real filters, get clean JSON, and pull the file you picked — from Python, your terminal or an AI agent.">
+<meta property="og:url" content="https://mohamed-amine-ben-mallessa.github.io/loop-haven/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website",
+      "url": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/",
+      "name": "LoopHaven",
+      "inLanguage": "en",
+      "description": "Documentation for LoopHaven, an unofficial Looperman API, CLI and MCP server.",
+      "publisher": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author" }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software",
+      "name": "LoopHaven",
+      "applicationCategory": "DeveloperApplication",
+      "applicationSubCategory": "Music production tooling",
+      "operatingSystem": "Windows, macOS, Linux",
+      "softwareVersion": "0.1.0",
+      "license": "https://opensource.org/licenses/MIT",
+      "codeRepository": "https://github.com/mohamed-amine-ben-mallessa/loop-haven",
+      "programmingLanguage": "Python",
+      "softwareRequirements": "Python 3.10 or newer",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "isAccessibleForFree": true,
+      "sameAs": [
+        "https://github.com/mohamed-amine-ben-mallessa/loop-haven",
+        "https://pypi.org/project/loophaven/"
+      ],
+      "author": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author" }
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#source",
+      "name": "LoopHaven",
+      "codeRepository": "https://github.com/mohamed-amine-ben-mallessa/loop-haven",
+      "programmingLanguage": "Python",
+      "runtimePlatform": "Python 3.10+",
+      "license": "https://opensource.org/licenses/MIT",
+      "codeSampleType": "full solution"
+    },
+    {
+      "@type": "Person",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author",
+      "name": "LoopHaven contributors",
+      "url": "https://github.com/mohamed-amine-ben-mallessa"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="./">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5" fill="currentColor" opacity=".12"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 12h2.2M17.8 12H20"/><path d="M8.1 7.4v9.2M12 4.6v14.8M15.9 8.6v6.8"/></g></svg>
+      LoopHaven
+    </a>
+    <nav class="site-nav">
+      <a href="looperman-api/">Looperman API</a>
+      <a href="download-loops-python/">Python</a>
+      <a href="mcp/">MCP</a>
+      <a href="filters/">Filters</a>
+      <a href="reaper/">REAPER</a>
+      <a href="limits/">Limits</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <h1>An unofficial Looperman API, CLI and MCP server</h1>
+
+    <div class="answer">
+      <p><strong>Looperman has no public API.</strong> LoopHaven is a local service that
+      reads the site the way a browser does and exposes its real search filters as
+      JSON: one HTTP API, one <code>haven</code> command, and an MCP server for
+      agents. It does not redistribute audio, and it does not work around the
+      download quota.</p>
+    </div>
+
+    <p class="meta">Last verified against the live site on 16 November 2026 · v0.1.0 · MIT</p>
+
+<pre><code>pip install "loophaven[mcp]"
+
+# 1. start the local API
+python -m uvicorn loophaven.api.app:app --host 127.0.0.1 --port 8000
+
+# 2. search — public previews need no account
+curl "http://127.0.0.1:8000/api/search?genre=Trap&amp;bpm=140&amp;limit=2"</code></pre>
+
+    <h2>What makes it different from the other scrapers</h2>
+
+    <p>There are a dozen Looperman downloaders on GitHub. They all stop at
+    &ldquo;here is some HTML&rdquo;. Three things are different here.</p>
+
+    <ul>
+      <li><strong>It speaks the site's own vocabulary.</strong> Genre, category,
+      key, time signature, tempo range, date window and sort order are resolved
+      from the advanced-search form itself, not guessed from URL slugs. Ask for
+      <code>F#m</code>, <code>Bb</code> or <code>4/4</code> and it sends what the
+      site actually submits.</li>
+      <li><strong>It is honest about what it returns.</strong> <code>total</code>
+      is <code>null</code> past page one, because Looperman stops counting. When
+      the quota is hit you get a <code>429</code>, not a silent MP3 renamed to
+      <code>.wav</code>.</li>
+      <li><strong>It plugs into a DAW and into agents.</strong> One HTTP API, one
+      CLI, and an optional MCP server, so a ReaScript, a shell script or Claude
+      can all ask the same questions.</li>
+    </ul>
+
+    <h2>Where to start</h2>
+
+    <ul class="cards">
+      <li><a href="looperman-api/">
+        <span class="k">Does Looperman have an API?</span>
+        <span class="d">No. What exists instead, and what the hidden search form returns.</span>
+      </a></li>
+      <li><a href="download-loops-python/">
+        <span class="k">Download loops with Python</span>
+        <span class="d">Preview versus WAV, why an anonymous request gets no download link.</span>
+      </a></li>
+      <li><a href="mcp/">
+        <span class="k">MCP server</span>
+        <span class="d">Six tools for Claude, Cursor or any MCP client, in one config block.</span>
+      </a></li>
+      <li><a href="filters/">
+        <span class="k">Filter reference</span>
+        <span class="d">69 genres, 40 categories, 24 keys, and the tempo-is-a-range trap.</span>
+      </a></li>
+      <li><a href="reaper/">
+        <span class="k">REAPER and other DAWs</span>
+        <span class="d">Pull a preview or a WAV into a project folder from a local endpoint.</span>
+      </a></li>
+      <li><a href="limits/">
+        <span class="k">Limits and 429s</span>
+        <span class="d">The two different limits, and why neither is retried automatically.</span>
+      </a></li>
+    </ul>
+
+    <h2>What it is not</h2>
+
+    <ul>
+      <li><strong>Not an official API.</strong> Nothing here is published or
+      supported by Looperman. If their HTML changes, parsing breaks — that is why
+      the <a href="https://github.com/mohamed-amine-ben-mallessa/loop-haven/tree/main/docs/REVERSE-ENGINEERING.md">reverse-engineering notes</a>
+      are in the repository.</li>
+      <li><strong>Not a mirror.</strong> The repository ships zero audio files.
+      Downloads use your own account and consume your own quota.</li>
+      <li><strong>Not a workaround.</strong> One account per person, no rotation,
+      no proxies. A <code>429</code> means wait.</li>
+      <li><strong>Not a cloud service.</strong> It binds to
+      <code>127.0.0.1</code> and has no authentication. Do not expose it.</li>
+    </ul>
+
+    <hr>
+
+    <p>Source: <a href="https://github.com/mohamed-amine-ben-mallessa/loop-haven">github.com/mohamed-amine-ben-mallessa/loop-haven</a>
+    · Package: <a href="https://pypi.org/project/loophaven/">pypi.org/project/loophaven</a></p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>Unofficial project.</strong> LoopHaven is not affiliated with,
+    endorsed by, or supported by Looperman. It reads public pages and your own
+    session, at human pace. It does not redistribute audio and does not bypass
+    quotas.</p>
+    <p>Looperman is a trademark of its owner, used here only to identify the site
+    this tool reads. Loops and acapellas remain the property of their creators.</p>
+    <p>Last updated 16 November 2026 · <a href="https://github.com/mohamed-amine-ben-mallessa/loop-haven/blob/main/LICENSE">MIT</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Looperman MCP server for Claude and Cursor — LoopHaven</title>
+<meta name="description" content="Six MCP tools that let an AI agent search Looperman loops and acapellas, read a detail page, get a preview URL and export a ZIP. The agent sees JSON, never HTML.">
+<link rel="canonical" href="https://mohamed-amine-ben-mallessa.github.io/loop-haven/mcp/">
+<meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="LoopHaven">
+<meta property="og:title" content="A Looperman MCP server for Claude and Cursor">
+<meta property="og:description" content="Six tools, one config block. The agent gets JSON, so it cannot invent a filter value or follow the wrong download link.">
+<meta property="og:url" content="https://mohamed-amine-ben-mallessa.github.io/loop-haven/mcp/">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/mcp/#article",
+      "headline": "A Looperman MCP server for Claude and Cursor",
+      "description": "LoopHaven ships an optional Model Context Protocol server with six tools for searching Looperman loops and acapellas from an AI agent.",
+      "inLanguage": "en",
+      "datePublished": "2026-11-16",
+      "dateModified": "2026-11-16",
+      "author": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author" },
+      "isPartOf": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website" },
+      "mentions": { "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software" }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#author",
+      "name": "LoopHaven contributors",
+      "url": "https://github.com/mohamed-amine-ben-mallessa"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#website",
+      "url": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/",
+      "name": "LoopHaven"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://mohamed-amine-ben-mallessa.github.io/loop-haven/#software",
+      "name": "LoopHaven",
+      "applicationCategory": "DeveloperApplication",
+      "license": "https://opensource.org/licenses/MIT",
+      "codeRepository": "https://github.com/mohamed-amine-ben-mallessa/loop-haven"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="5" fill="currentColor" opacity=".12"/><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 12h2.2M17.8 12H20"/><path d="M8.1 7.4v9.2M12 4.6v14.8M15.9 8.6v6.8"/></g></svg>
+      LoopHaven
+    </a>
+    <nav class="site-nav">
+      <a href="../looperman-api/">Looperman API</a>
+      <a href="../download-loops-python/">Python</a>
+      <a href="../mcp/" aria-current="page">MCP</a>
+      <a href="../filters/">Filters</a>
+      <a href="../reaper/">REAPER</a>
+      <a href="../limits/">Limits</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <h1>A Looperman MCP server for Claude and Cursor</h1>
+
+    <div class="answer">
+      <p><strong>LoopHaven ships an optional MCP server with six tools:</strong>
+      search loops, search acapellas, read one acapella, get a preview URL, export a
+      ZIP, and toggle a favourite. The agent receives JSON, never HTML — so it
+      cannot invent a filter value, and it cannot follow one of the sixteen
+      download links on a detail page and grab the wrong loop.</p>
+    </div>
+
+    <p class="meta">LoopHaven 0.1.0 · <code>pip install "loophaven[mcp]"</code></p>
+
+    <h2>Configuration</h2>
+
+    <p>The MCP server is a thin client over the local HTTP API, so the API has to
+    be running first. Point the agent at the same port.</p>
+
+<pre><code># terminal 1
+python -m uvicorn loophaven.api.app:app --host 127.0.0.1 --port 8000</code></pre>
+
+<pre><code>{
+  "mcpServers": {
+    "loophaven": {
+      "command": "loophaven-mcp",
+      "env": { "LOOPHAVEN_API": "http://127.0.0.1:8000" }
+    }
+  }
+}</code></pre>
+
+    <p>That block goes in the MCP configuration of the client — Claude Desktop,
+    Cursor, or anything else that speaks the protocol. No API key, no account, no
+    remote service.</p>
+
+    <h2>The six tools</h2>
+
+    <table>
+      <thead><tr><th>Tool</th><th>What the agent gets</th></tr></thead>
+      <tbody>
+        <tr><td><code>search_loops</code></td><td>Results with title, BPM, key, genre, author, duration and MP3 preview URL</td></tr>
+        <tr><td><code>search_acapellas</code></td><td>The same, plus the licence wording the page displays</td></tr>
+        <tr><td><code>get_acapella_detail</code></td><td>One acapella, with its usage terms in full</td></tr>
+        <tr><td><code>get_preview_url</code></td><td>A playable MP3 URL for one item</td></tr>
+        <tr><td><code>export_loop_zip</code></td><td>A 2–4 loop pack, with a README recalling the licence</td></tr>
+        <tr><td><code>toggle_favorite</code></td><td>Favourite state on the account, when a session is open</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Why JSON matters more than it sounds</h2>
+
+    <p>Handing a language model the raw listing page is not a shortcut. Every card
+    on the page shares the same parent element, and a detail page carries sixteen
+    <code>/getfiles/</code> links — fifteen of which belong to recommended loops.
+    A model reading that HTML will confidently attribute the wrong BPM to the wrong
+    loop, and nothing in the output will look wrong.</p>
+
+    <p>Resolving the vocabulary before the model sees it removes the whole class of
+    error: <code>"{'genre': {'id': 54, 'label': 'Trap'}}"</code> is either right or
+    absent, whereas <code>gid=54</code> in a URL is unverifiable to a reader.</p>
+
+    <h2>The etiquette the tools assume</h2>
+
+    <p>A tool that can download is a tool that can download ten thousand files. The
+    repository includes
+    <a href="https://github.com/mohamed-amine-ben-mallessa/loop-haven/blob/main/skills/loop-haven/SKILL.md">a skill file</a>
+    that tells an agent how to behave, and the constraints are deliberately blunt:</p>
+
+    <ul>
+      <li><strong>Preview before download.</strong> Auditioning costs nothing;
+      downloading costs quota.</li>
+      <li><strong>Read the licence label.</strong> Some acapellas are
+      non-commercial only. The tool returns the wording; the agent should quote it
+      rather than summarise it.</li>
+      <li><strong>Never bulk-harvest.</strong> A search returns a page, not a
+      catalogue.</li>
+      <li><strong>A <code>429</code> means wait.</strong> Not retry, not switch
+      account.</li>
+    </ul>
+
+    <h2>What it is not</h2>
+
+    <p>It is not a plugin for your DAW, and it does not place audio on a timeline.
+    The agent finds and fetches; arrangement happens where you work. See
+    <a href="../reaper/">REAPER and other DAWs</a> for the half-step that gets a
+    file into a project folder.</p>
+
+    <p>Next: the <a href="../filters/">filter reference</a>, so you can tell the
+    agent what to ask for.</p>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>Unofficial project.</strong> LoopHaven is not affiliated with,
+    endorsed by, or supported by Looperman. It reads public pages and your own
+    session, at human pace. It does not redistribute audio and does not bypass
+    quotas.</p>
+    <p>Looperman is a trademark of its owner, used here only to identify the site
+    this tool reads. Loops and acapellas remain the property of their creators.</p>
+    <p>Last updated 16 November 2026 · <a href="https://github.com/mohamed-amine-ben-mallessa/loop-haven/blob/main/LICENSE">MIT</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

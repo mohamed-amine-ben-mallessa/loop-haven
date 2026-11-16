@@ -1,5 +1,6 @@
 """CLI tests: the download command must refuse early, and never retry a 429."""
 import io
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -125,6 +126,29 @@ class DownloadCommandTests(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 run(["download", "--id", "not-an-id"])
         request.assert_not_called()
+
+
+class ReadmeCommandTests(unittest.TestCase):
+    """A command documented in the README must exist in the parser.
+
+    0.2.0 exists because `haven download` was in the README while PyPI still
+    served 0.1.1: the documented command did not exist for anyone who installed
+    the package. This test fails the moment that gap reopens.
+    """
+
+    def test_every_haven_command_in_the_readme_exists(self):
+        readme = Path(__file__).resolve().parents[2] / "README.md"
+        text = readme.read_text(encoding="utf-8")
+        documented = set(re.findall(r"\bhaven ([a-z][a-z-]*)", text))
+        self.assertTrue(documented, "no `haven <command>` found in the README")
+
+        parser = cli.build_parser()
+        subparsers = next(
+            action for action in parser._actions if action.dest == "command"
+        )
+        known = set(subparsers.choices)
+        unknown = sorted(documented - known)
+        self.assertEqual(unknown, [], f"README documents unknown command(s): {unknown}")
 
 
 if __name__ == "__main__":

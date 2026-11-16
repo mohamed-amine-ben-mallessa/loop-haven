@@ -3,7 +3,9 @@
 All notable changes to this project. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions use semver.
 
-## [Unreleased]
+## [0.1.1] - 2026-11-16
+
+Metadata and documentation release; the API is unchanged from 0.1.0.
 
 ### Added
 - Local rate limiter on page reads: 30 per 60 s per process, overridable with
@@ -11,6 +13,12 @@ All notable changes to this project. Format loosely follows
   the outside, and a ban takes the account's WAV downloads with it. Cached reads
   are free, the counter is exposed on `/api/health`, and an exhausted budget
   answers `429` instead of a `500`.
+- Documentation site at <https://mohamed-amine-ben-mallessa.github.io/loop-haven/>:
+  one page per question, hand-written HTML with no JavaScript, linked from the
+  README and registered as the package's `Documentation` URL.
+- `Changelog` project URL, and classifiers/keywords that describe what the
+  package is (`Environment :: Web Environment`, `Intended Audience :: Developers`,
+  `Topic :: Software Development :: Libraries :: Python Modules`).
 
 ### Fixed
 - `GET /api/acapellas/search?category=` now returns `422`. Looperman ignores
@@ -22,6 +30,7 @@ All notable changes to this project. Format loosely follows
   the page heading (or the first part of the page title).
 - `POST /api/download/zip` wrote a French message into its error entries
   (`Limite Looperman atteinte`) in an otherwise English output.
+- The README printed the skill-file pointer twice.
 
 ## [0.1.0] - 2026-11-16
 

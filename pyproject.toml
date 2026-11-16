@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "loophaven"
-version = "0.1.0"
+version = "0.1.1"
 description = "Local-first search API, CLI and MCP server for Looperman loops and acapella previews"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -13,20 +13,27 @@ license-files = ["LICENSE"]
 authors = [{ name = "LoopHaven contributors" }]
 keywords = [
   "looperman",
+  "looperman-api",
+  "looperman-mcp",
   "loops",
   "samples",
+  "sample-library",
   "acapella",
+  "acapellas",
   "music-production",
   "daw",
   "reaper",
   "mcp",
+  "model-context-protocol",
   "fastapi",
   "cli",
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
+  "Environment :: Web Environment",
   "Framework :: FastAPI",
+  "Intended Audience :: Developers",
   "Intended Audience :: End Users/Desktop",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
@@ -35,6 +42,8 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Topic :: Multimedia :: Sound/Audio",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Utilities",
 ]
 dependencies = [
   "fastapi>=0.110,<1",
@@ -59,7 +68,8 @@ loop-haven-mcp = "loophaven.mcp_server:main"
 Homepage = "https://github.com/mohamed-amine-ben-mallessa/loop-haven"
 Repository = "https://github.com/mohamed-amine-ben-mallessa/loop-haven"
 Issues = "https://github.com/mohamed-amine-ben-mallessa/loop-haven/issues"
-Documentation = "https://github.com/mohamed-amine-ben-mallessa/loop-haven/tree/main/docs"
+Documentation = "https://mohamed-amine-ben-mallessa.github.io/loop-haven/"
+Changelog = "https://github.com/mohamed-amine-ben-mallessa/loop-haven/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]

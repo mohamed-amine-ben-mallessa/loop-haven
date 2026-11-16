@@ -101,6 +101,28 @@ def _save_session():
         pass
 
 
+def _account_username(soup):
+    """The member's display name, read from ``/account/``.
+
+    Never read it from the profile anchors: that page labels them "My Profile",
+    "About Me", "Blocked Users", "Followed Users"…, so every account used to
+    report ``username: "My Profile"``. The name is the page heading, or the
+    first segment of ``"<name> - My Profile | Looperman"``.
+    """
+    heading = soup.find("h1")
+    if heading is not None:
+        text = heading.get_text(" ", strip=True)
+        if text:
+            return text
+    title = soup.find("title")
+    if title is not None:
+        text = title.get_text(" ", strip=True)
+        name = re.split(r"\s+-\s+|\s+\|", text)[0].strip()
+        if name and name.lower() not in {"looperman", "my profile"}:
+            return name
+    return None
+
+
 def _verify_session(session):
     """True/False when Looperman answers; None when the check itself failed.
 
@@ -253,21 +275,15 @@ def login(email, password):
         if "/account/login" not in account.url and account_link is not None:
             # Extract username/user_id
             user_id = None
-            username = None
             href = account_link.get("href")
             m = re.search(r"/users/profile/(\d+)", href or "")
             if m:
                 user_id = m.group(1)
-            # try to get username from profile link text or from page
-            # Look for logged-in user display
-            # The nav account may have username
-            username = account_link.get_text(strip=True) or email.split("@")[0]
-            
-            # Also try to find username via title or header
-            if not username:
-                title_match = re.search(r"Welcome.*?(\w+)", resp.text)
-                if title_match:
-                    username = title_match.group(1)
+            # The profile links on /account/ are labelled "My Profile",
+            # "About Me", "Blocked Users"…, so reading their text returned
+            # "My Profile" for every account. The member's name is the page
+            # heading, or the first part of "<name> - My Profile | Looperman".
+            username = _account_username(account_soup) or email.split("@")[0]
             
             _session_data["logged_in"] = True
             _session_data["email"] = email

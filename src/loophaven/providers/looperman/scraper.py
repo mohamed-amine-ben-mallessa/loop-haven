@@ -1,6 +1,8 @@
+import os
 import requests
 import re
 import time
+from collections import deque
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, quote, urlencode
 import json
@@ -52,6 +54,64 @@ def clear_cache():
     _CACHE.clear()
 
 
+# One account, one IP, one browser: 30 page reads a minute is roughly one every
+# two seconds, which is faster than a human browsing and slower than the
+# patterns Looperman throttles. The counter lives in this process only, so it
+# protects a single-user install from its own retry loops, nothing more.
+# Raise or lower it with LOOPHAVEN_RATE_LIMIT; a bad value must never make the
+# module unimportable, so it falls back to the default.
+_RATE_LIMIT_WINDOW = 60.0
+_RATE_LIMIT_DEFAULT = 30
+
+
+def _configured_rate_limit():
+    try:
+        value = int(os.environ.get("LOOPHAVEN_RATE_LIMIT", "") or _RATE_LIMIT_DEFAULT)
+    except (TypeError, ValueError):
+        return _RATE_LIMIT_DEFAULT
+    return value if value > 0 else _RATE_LIMIT_DEFAULT
+
+
+_RATE_LIMIT_MAX = _configured_rate_limit()
+_rate_timestamps = deque()
+
+
+def _rate_limit_check():
+    """Raise `RateLimited` when this process is over its local budget."""
+    now = time.monotonic()
+    cutoff = now - _RATE_LIMIT_WINDOW
+    while _rate_timestamps and _rate_timestamps[0] < cutoff:
+        _rate_timestamps.popleft()
+    if len(_rate_timestamps) >= _RATE_LIMIT_MAX:
+        # An empty deque is only possible when the budget was set to 0; report a
+        # full window rather than crashing on a missing index.
+        oldest = _rate_timestamps[0] if _rate_timestamps else now
+        retry_after = max(1, round(_RATE_LIMIT_WINDOW - (now - oldest)))
+        raise RateLimited(
+            f"local rate limit reached ({len(_rate_timestamps)} page reads in "
+            f"{_RATE_LIMIT_WINDOW:.0f}s, max {_RATE_LIMIT_MAX}); retry in {retry_after}s. "
+            "This is LoopHaven protecting the account from Looperman's own throttling."
+        )
+    _rate_timestamps.append(now)
+
+
+def _rate_limit_reset():
+    """Forget the recorded page reads (tests, and after a known quiet period)."""
+    _rate_timestamps.clear()
+
+
+def rate_limit_state():
+    """Rate-limit counters for `/api/health`. No URLs, no credentials."""
+    cutoff = time.monotonic() - _RATE_LIMIT_WINDOW
+    recent = sum(1 for stamp in _rate_timestamps if stamp >= cutoff)
+    return {
+        "max_requests": _RATE_LIMIT_MAX,
+        "window_seconds": int(_RATE_LIMIT_WINDOW),
+        "recent_requests": recent,
+        "remaining": max(0, _RATE_LIMIT_MAX - recent),
+    }
+
+
 def _session(use_auth):
     if use_auth:
         try:
@@ -69,6 +129,7 @@ def fetch_html(url, use_auth=False, timeout=20):
     cached = _cache_get(key)
     if cached is not None:
         return cached
+    _rate_limit_check()
     response = _session(use_auth).get(url, headers=HEADERS, timeout=timeout)
     response.raise_for_status()
     _cache_put(key, response.text)
@@ -433,6 +494,8 @@ def scrape_acapellas(url, limit=4, use_auth=False):
     """Parse acapella listing cards and expose their public preview URLs and licence labels."""
     try:
         html = fetch_html(url, use_auth=use_auth, timeout=20)
+    except RateLimited:
+        raise
     except Exception as exc:
         return {"error": str(exc), "url": url, "acapellas": [], "count": 0}
 
@@ -534,6 +597,8 @@ def scrape_acapellas(url, limit=4, use_auth=False):
 def scrape_loops(url, limit=4, use_auth=False):
     try:
         html = fetch_html(url, use_auth=use_auth, timeout=20)
+    except RateLimited:
+        raise
     except Exception as exc:
         return {"error": str(exc), "url": url, "loops": []}
 

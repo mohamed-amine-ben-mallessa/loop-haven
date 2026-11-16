@@ -21,11 +21,17 @@ Everything is JSON except the download routes, which stream bytes.
 ```json
 {"status": "ok", "message": "LoopHaven API proxy ready",
  "base": "https://www.looperman.com",
- "auth": {"logged_in": true, "username": "My Profile", "user_id": "8655176"}}
+ "auth": {"logged_in": true, "username": "Benmallessa", "user_id": "8655176"},
+ "rate_limit": {"max_requests": 30, "window_seconds": 60,
+                "recent_requests": 3, "remaining": 27}}
 ```
 
 `logged_in` is verified against `/account/`, not guessed from cached state. The
-email is never returned.
+email is never returned. `username` is the member heading on `/account/` — the
+profile links on that page all say "My Profile", so they are never read as a name.
+
+`rate_limit` is the local token bucket described below. It counts page reads in
+this process only; cached reads are free.
 
 ### `GET /api/filters`
 
@@ -142,7 +148,9 @@ Same shape, with acapella-only filters:
 
 `genre`, `key`, `bpm`/`ftempo`/`ttempo` (40–220), `keyword`, `tsig`, `mid`,
 `who`, `when`, `order`, `dir`, `page`, `ppage`, `favs`, `limit` behave as above.
-`category` does **not** exist for acapellas and is rejected.
+`category` does **not** exist for acapellas and is rejected with `422`: the site
+ignores `cid=` on that listing and still returns results, so accepting it would
+return a silently unfiltered page.
 
 ```bash
 curl "http://127.0.0.1:8000/api/acapellas/search?genre=Boom%20Bap&bpm=86&mf=1&style=1&ur=1&limit=2"
@@ -280,3 +288,23 @@ accepted; redirects are refused.
 Same-origin download proxy for previews. Hostname is validated exactly
 (`looperman.com`, `www.looperman.com`), redirects must stay on it, `429` is
 passed through, and HTML responses are rejected.
+
+---
+
+## Rate limits
+
+Two different limits exist, and they answer with the same status on purpose.
+
+| Limit | Who sets it | What it protects | Response |
+|---|---|---|---|
+| Local budget | this process, `LOOPHAVEN_RATE_LIMIT` (default 30 page reads / 60 s) | your account and IP from your own retry loops | `429`, `detail` starts with `local rate limit` |
+| Looperman quota | Looperman | its catalogue | `429`, `detail` names the upstream refusal |
+
+Cached page reads are free, so browsing back is not punished. When the local
+budget is exhausted the counter is exposed on `/api/health`; nothing is retried
+automatically, because a `429` means wait.
+
+```bash
+# slower, for a shared connection or a big batch
+LOOPHAVEN_RATE_LIMIT=10
+```

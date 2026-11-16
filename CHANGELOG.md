@@ -3,7 +3,27 @@
 All notable changes to this project. Format loosely follows
 [Keep a Changelog](https://keepachangelog.com/); versions use semver.
 
-## [0.1.0] — 2026-11-16
+## [Unreleased]
+
+### Added
+- Local rate limiter on page reads: 30 per 60 s per process, overridable with
+  `LOOPHAVEN_RATE_LIMIT`. A retry loop inside one install looks like abuse from
+  the outside, and a ban takes the account's WAV downloads with it. Cached reads
+  are free, the counter is exposed on `/api/health`, and an exhausted budget
+  answers `429` instead of a `500`.
+
+### Fixed
+- `GET /api/acapellas/search?category=` now returns `422`. Looperman ignores
+  `cid=` on that listing and still returns results, so the filter used to look
+  like it worked while returning an unfiltered page. The documentation already
+  claimed the rejection; the code now does it.
+- `username` was `"My Profile"` for every account: the name was read from the
+  `/account/` navigation links, which are all labelled "My Profile". It is now
+  the page heading (or the first part of the page title).
+- `POST /api/download/zip` wrote a French message into its error entries
+  (`Limite Looperman atteinte`) in an otherwise English output.
+
+## [0.1.0] - 2026-11-16
 
 First public release.
 

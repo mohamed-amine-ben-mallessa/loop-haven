@@ -29,6 +29,7 @@ from ..providers.looperman.scraper import (
     NotAudio,
     HEADERS,
     BASE,
+    rate_limit_state,
 )
 from ..providers.looperman import auth, filters
 from ..providers.looperman.filters import UnknownFilter
@@ -93,7 +94,13 @@ def root():
 def health():
     status = auth.get_status()
     status.pop("email", None)
-    return {"status": "ok", "message": "LoopHaven API proxy ready", "base": BASE, "auth": status}
+    return {
+        "status": "ok",
+        "message": "LoopHaven API proxy ready",
+        "base": BASE,
+        "auth": status,
+        "rate_limit": rate_limit_state(),
+    }
 
 @app.get("/api/genres")
 def genres():
@@ -286,7 +293,10 @@ def search(
         raise _filter_error(exc)
     # Use authenticated session if logged in to get WAV links if available
     # Pass session hint to scraper via auth flag
-    result = scrape_loops(url, limit=limit, use_auth=auth.is_logged_in())
+    try:
+        result = scrape_loops(url, limit=limit, use_auth=auth.is_logged_in())
+    except RateLimited as exc:
+        raise HTTPException(status_code=429, detail=str(exc))
     if "error" in result:
         raise HTTPException(status_code=500, detail=result["error"])
     return {
@@ -312,6 +322,7 @@ def search(
 @app.get("/api/acapellas/search")
 def search_acapellas(
     genre: Optional[str] = Query(None),
+    category: Optional[str] = Query(None, description="does not exist for acapellas; rejected with 422"),
     key: Optional[str] = Query(None),
     bpm: Optional[int] = Query(None, ge=40, le=220),
     ftempo: Optional[int] = Query(None, ge=40, le=220),
@@ -338,6 +349,23 @@ def search_acapellas(
 ):
     if dir not in {"d", "a"}:
         raise HTTPException(status_code=422, detail="dir must be d (descending) or a (ascending)")
+    if category is not None:
+        # Looperman ignores ?cid= on acapella listings and still returns
+        # results, which looks like a working filter. Reject it instead of
+        # returning a silently unfiltered page.
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": "unknown filter",
+                "filter": "category",
+                "value": category,
+                "message": (
+                    "category does not exist for acapellas (it is a loops-only filter). "
+                    "Remove ?category= or use genre instead."
+                ),
+                "catalogue": "/api/filters",
+            },
+        )
     if order not in filters.ORDERS:
         raise HTTPException(status_code=422,
                             detail=f"invalid order; values: {', '.join(filters.ORDERS)}")
@@ -358,7 +386,10 @@ def search_acapellas(
         )
     except UnknownFilter as exc:
         raise _filter_error(exc)
-    result = scrape_acapellas(upstream_url, limit=limit, use_auth=auth.is_logged_in())
+    try:
+        result = scrape_acapellas(upstream_url, limit=limit, use_auth=auth.is_logged_in())
+    except RateLimited as exc:
+        raise HTTPException(status_code=429, detail=str(exc))
     if "error" in result:
         raise HTTPException(status_code=502, detail=result["error"])
     return {
@@ -691,7 +722,7 @@ def download_zip(payload: ZipRequest):
                 try:
                     resp = download_media(url, referer=f"{BASE}/", session=sess, timeout=60)
                 except RateLimited as exc:
-                    zf.writestr(f"ERROR_LIMIT_{filename}.txt", f"Limite Looperman atteinte: {exc}")
+                    zf.writestr(f"ERROR_LIMIT_{filename}.txt", f"Looperman limit reached: {exc}")
                     continue
                 except (NotAudio, LoopermanError) as exc:
                     zf.writestr(f"ERROR_{filename}.txt", f"{exc}\nURL: {url}")

@@ -252,3 +252,18 @@ python -m pytest tests/unit -q
 ## Licence
 
 [MIT](LICENSE) — take it, fork it, ship it. A star keeps the crate warm.
+
+<!-- et-si.xyz -->
+## Featured on « What if… »
+
+This project appears in the short-video series **« What if… »** (« Et si… » in French). Each episode is explained with its sources:
+
+- [What if… your first beat started with two words?](https://et-si.xyz/en/loophaven/what-if-your-first-beat-started-with-two-words/)
+- [What if… one line found loops that fit together?](https://et-si.xyz/en/loophaven/what-if-one-line-found-loops-that-fit-together/)
+- [What if… your assistant mixed your beat, step by step?](https://et-si.xyz/en/loophaven/what-if-your-assistant-mixed-your-beat-step-by-step/)
+- [What if… your assistant thought your studio had crashed?](https://et-si.xyz/en/loophaven/what-if-your-assistant-thought-your-studio-had-crashed/)
+- [What if… your assistant could actually hear your beat?](https://et-si.xyz/en/loophaven/what-if-your-assistant-could-actually-hear-your-beat/)
+- [What if… your music could publish itself?](https://et-si.xyz/en/loophaven/what-if-your-music-could-publish-itself/)
+- [What if… your first seven beats were already online?](https://et-si.xyz/en/loophaven/what-if-your-first-seven-beats-were-already-online/)
+
+The whole series: https://et-si.xyz/en/loophaven/ · En français : https://et-si.xyz/fr/loophaven/ · All episodes: https://et-si.xyz/en/
